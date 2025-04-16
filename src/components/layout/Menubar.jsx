@@ -26,21 +26,21 @@ const Menubar = () => {
     {
       key: "2",
       icon: <ShopOutlined />,
-      label: <Link href="/customers">Customers</Link>,
-      path: "/customers",
+      label: <Link href="/blog-list">Blog List</Link>,
+      path: "/blog-list",
       id: 154,
     },
     {
       key: "3",
       icon: <DatabaseOutlined />,
-      label: <Link href="/leads">Leads</Link>,
-      path: "/leads",
+      label: <Link href="/blog-create">Create Blog</Link>,
+      path: "/blog-create",
     },
     {
       key: "4",
       icon: <TagOutlined />,
-      label: <Link href="/follow-up">Follow-up</Link>,
-      path: "/follow-up",
+      label: <Link href="/blog-category">Categories</Link>,
+      path: "/blog-category",
     },
     {
       key: "sub2",
