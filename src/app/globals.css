@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+
+}
+
+
+/* Add this CSS */
+.logo img {
+  transition: all 0.3s ease-in-out;
+  /* Smooth resizing */
+}
+
+.logo.collapsed img {
+  width: 50px !important;
+  /* Adjust width for collapsed */
+  height: 30px !important;
+  /* Adjust height for collapsed */
+}
+
+.logo.expanded img {
+  width: 150px !important;
+  /* Adjust width for expanded */
+  height: 80px !important;
+  /* Adjust height for expanded */
+}
+
+/* Scrollbar for Webkit browsers (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+}
+
+/* Track (background of the scrollbar) */
+::-webkit-scrollbar-track {
+  /* background: #242a64; Blue primary color */
+  border-radius: 4px;
+}
+
+/* Handle (the moving part) */
+::-webkit-scrollbar-thumb {
+  /* background: #f04d23; Orange primary color */
+  border-radius: 4px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  /* background: #d03c1a; Slightly darker orange */
+}
+/* Custom Scrollbar for Ant Design Table */
+.ant-table-body {
+  scrollbar-width: thin; /* Firefox ke liye */
+ /* Firefox ke liye */
+}
+
+/* WebKit Browsers (Chrome, Safari, Edge) */
+.ant-table-body::-webkit-scrollbar {
+  width: 4px !important; /* Vertical scrollbar width */
+  height: 4px !important; /* Horizontal scrollbar height */
+}
+/* Target the close button in all Ant Design Drawers */
+.ant-drawer-close {
+  color: #fff !important; /* Close icon color */
+  /* background-color: #f04d23 !important; Background color for close button */
+  border-radius: 20% !important; /* Make the button circular */
+  font-size: 20px !important; /* Increase the icon size */
+  padding: 5px !important; /* Adjust padding for the button */
+}
+
+.ant-drawer-close:hover {
+  /* background-color: #e03d19 !important; */
+  border: 2px solid #e03d19  !important;
+}
+
