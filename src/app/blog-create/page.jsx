@@ -16,24 +16,31 @@ import { UploadOutlined, InfoCircleOutlined } from "@ant-design/icons";
 export default function CreateBlog() {
   const [form] = Form.useForm();
   const [isDraft, setIsDraft] = useState(true);
+  const [fileList, setFileList] = useState([]);
 
   const handleFinish = (values) => {
     const formattedData = {
       title: values.title,
       content: values.content,
-      tags: values.tags?.split(",").map((tag) => tag.trim()),
-      categories: values.categories?.split(",").map((cat) => cat.trim()),
-      subcategories: values.subcategories?.split(",").map((sub) => sub.trim()),
+      tags: values.tags ? values.tags.split(",").map((tag) => tag.trim()) : [],
+      categories: values.categories
+        ? values.categories.split(",").map((cat) => cat.trim())
+        : [],
+      subcategories: values.subcategories
+        ? values.subcategories.split(",").map((sub) => sub.trim())
+        : [],
       excerpt: values.excerpt,
       seoTitle: values.seoTitle,
       metaDescription: values.metaDescription,
-      featuredImage: values.featuredImage?.file?.name || null,
+      featuredImage:
+        fileList.length > 0 ? fileList[0].name : null,
       status: isDraft ? "draft" : "published",
     };
 
     console.log("✅ Submitted Blog Data:", formattedData);
     message.success(isDraft ? "Draft saved!" : "Blog published!");
     form.resetFields();
+    setFileList([]);
     setIsDraft(true);
   };
 
@@ -81,7 +88,9 @@ export default function CreateBlog() {
               <Form.Item
                 label="Tags"
                 name="tags"
-                rules={[{ required: true, message: "Enter at least one tag" }]}
+                rules={[
+                  { required: true, message: "Enter at least one tag" },
+                ]}
               >
                 <Input placeholder="e.g., react, blog" />
               </Form.Item>
@@ -89,7 +98,9 @@ export default function CreateBlog() {
               <Form.Item
                 label="Categories"
                 name="categories"
-                rules={[{ required: true, message: "Enter at least one category" }]}
+                rules={[
+                  { required: true, message: "Enter at least one category" },
+                ]}
               >
                 <Input placeholder="e.g., Tech, Dev" />
               </Form.Item>
@@ -101,7 +112,12 @@ export default function CreateBlog() {
 
             {/* Featured Image */}
             <Form.Item label="Featured Image" name="featuredImage">
-              <Upload beforeUpload={() => false} maxCount={1}>
+              <Upload
+                beforeUpload={() => false}
+                fileList={fileList}
+                onChange={({ fileList }) => setFileList(fileList)}
+                maxCount={1}
+              >
                 <Button icon={<UploadOutlined />}>Upload Image</Button>
               </Upload>
             </Form.Item>
@@ -178,6 +194,7 @@ export default function CreateBlog() {
               onClick={() => {
                 form.resetFields();
                 setIsDraft(true);
+                setFileList([]);
                 message.info("Form reset");
               }}
             >

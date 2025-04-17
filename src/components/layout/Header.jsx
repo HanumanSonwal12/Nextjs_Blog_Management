@@ -4,7 +4,6 @@ import { Layout, Button, Dropdown, Menu } from 'antd';
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Spin } from "antd";
 
 const { Header } = Layout;
 
@@ -50,15 +49,12 @@ function DashbardHeader({ collapsed, toggleCollapsed }) {
 
       <div className="flex items-center gap-6" style={{ marginRight: '16px' }}>
         <Dropdown
-          menu={<Menu items={menuItems} />}
+          overlay={<Menu items={menuItems} />}
           placement="bottomRight"
         >
           <div className="flex items-center gap-2 cursor-pointer">
             <Image src="/images/avtar.svg" alt="Avatar" width={40} height={40} />
-
-            {/* <div className="font-medium text-[#242a64]">
-              <Spin className="ml-[10px]" />
-            </div> */}          </div>
+          </div>
         </Dropdown>
       </div>
     </Header>
