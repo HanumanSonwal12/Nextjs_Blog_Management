@@ -1,45 +1,38 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Table, Tag, Tooltip } from "antd";
 import { EditOutlined, CommentOutlined } from "@ant-design/icons";
-
-const blogData = [
-  {
-    key: 1,
-    title: "Understanding React Server Components",
-    author: "Admin",
-    categories: ["React", "Next.js"],
-    tags: ["RSC", "SSR"],
-    comments: 5,
-    date: "2025-04-15",
-    seoTitle: "React Server Components",
-    metaDescription: "Learn the new React server rendering model.",
-  },
-  {
-    key: 2,
-    title: "A Guide to WordPress Headless CMS",
-    author: "Jane Doe",
-    categories: ["WordPress", "CMS"],
-    tags: ["API", "Headless"],
-    comments: 3,
-    date: "2025-04-10",
-    seoTitle: "WordPress Headless Setup",
-    metaDescription: "Setup a headless WordPress frontend.",
-  },
-  {
-    key: 3,
-    title: "Optimizing Next.js Apps for SEO",
-    author: "John Smith",
-    categories: ["Next.js", "SEO"],
-    tags: ["Meta", "Performance"],
-    comments: 7,
-    date: "2025-03-20",
-    seoTitle: "Next.js SEO Tips",
-    metaDescription: "How to improve SEO in Next.js apps.",
-  },
-];
+import { fetchData } from "@/utils/api"; 
 
 export default function WPStyleBlogTable() {
+  const [blogs, setBlogs] = useState([]);
+
+  useEffect(() => {
+    const getBlogs = async () => {
+      try {
+        const data = await fetchData("/blog");
+        setBlogs(
+          data.blogs.map((blog, index) => ({
+            key: blog._id || index,
+            title: blog.title,
+            author: blog.author?.name || "Unknown",
+            categories: blog.categories || [],
+            tags: blog.tags || [],
+            comments: blog.comments?.length || 0,
+            date: new Date(blog.createdAt).toISOString().split("T")[0],
+            seoTitle: blog.seoTitle,
+            metaDescription: blog.metaDescription,
+          }))
+        );
+      } catch (err) {
+        console.error("Failed to fetch blogs", err);
+      }
+    };
+
+    getBlogs();
+  }, []);
+
   const columns = [
     {
       title: <input type="checkbox" className="cursor-pointer" />,
@@ -119,7 +112,7 @@ export default function WPStyleBlogTable() {
     <div className="p-4 max-w-7xl mx-auto bg-white rounded shadow">
       <Table
         columns={columns}
-        dataSource={blogData}
+        dataSource={blogs}
         pagination={false}
         rowClassName="hover:bg-gray-50"
       />
