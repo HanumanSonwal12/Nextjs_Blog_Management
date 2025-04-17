@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   Button,
@@ -11,46 +11,32 @@ import {
   Popconfirm,
   Tag,
   Select,
+  Spin,
 } from "antd";
-
-const initialBlogs = [
-  {
-    id: 1,
-    title: "First Draft Post",
-    content: "Some draft content...",
-    tags: ["draft", "blog"],
-    categories: ["Dev"],
-    subcategories: ["JavaScript", "Frontend"], // Subcategories added
-    excerpt: "Short summary of draft",
-    seoTitle: "SEO Draft",
-    metaDescription: "SEO Description for draft",
-    author: "Jane Doe",
-    readingTime: 5,
-    coverImage: "https://via.placeholder.com/400x200", // Featured image added
-    status: "draft",
-  },
-  {
-    id: 2,
-    title: "Published React Tips",
-    content: "Some content about React...",
-    tags: ["react", "tips"],
-    categories: ["Tech"],
-    subcategories: ["React", "Frontend"], // Subcategories added
-    excerpt: "Quick React Tips",
-    seoTitle: "React SEO Title",
-    metaDescription: "Meta description",
-    author: "John Smith",
-    readingTime: 3,
-    coverImage: "https://via.placeholder.com/400x200", // Featured image added
-    status: "published",
-  },
-];
+import { apiGet, apiPut, apiDelete, fetchData } from "@/utils/api";
 
 export default function BlogList() {
-  const [blogs, setBlogs] = useState(initialBlogs);
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [editingBlog, setEditingBlog] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [form] = Form.useForm();
+
+  const fetchBlogs = async () => {
+    try {
+      setLoading(true);
+      const res = await fetchData("/blog");
+      setBlogs(res.blogs);
+    } catch (err) {
+      message.error("Failed to fetch blogs");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
 
   const handleEdit = (record) => {
     setEditingBlog(record);
@@ -58,41 +44,41 @@ export default function BlogList() {
       ...record,
       tags: record.tags?.join(", "),
       categories: record.categories?.join(", "),
-      subcategories: record.subcategories?.join(", "), // Handle subcategories
+      subcategories: record.subcategories?.join(", "),
     });
     setIsEditModalOpen(true);
   };
 
-  const handleSaveEdit = () => {
-    form
-      .validateFields()
-      .then((values) => {
-        const updatedBlog = {
-          ...editingBlog,
-          ...values,
-          tags: values.tags?.split(",").map((t) => t.trim()),
-          categories: values.categories?.split(",").map((c) => c.trim()),
-          subcategories: values.subcategories?.split(",").map((s) => s.trim()), // Handle subcategories
-        };
+  const handleSaveEdit = async () => {
+    try {
+      const values = await form.validateFields();
+      const updatedBlog = {
+        ...editingBlog,
+        ...values,
+        tags: values.tags?.split(",").map((t) => t.trim()),
+        categories: values.categories?.split(",").map((c) => c.trim()),
+        subcategories: values.subcategories?.split(",").map((s) => s.trim()),
+      };
 
-        setBlogs((prev) =>
-          prev.map((blog) =>
-            blog.id === editingBlog.id ? updatedBlog : blog
-          )
-        );
-        message.success("Blog updated successfully!");
-        setIsEditModalOpen(false);
-        setEditingBlog(null);
-        form.resetFields();
-      })
-      .catch(() => {
-        message.error("Please fill all required fields.");
-      });
+      await apiPut(`/blogs/${editingBlog._id}`, updatedBlog);
+      message.success("Blog updated!");
+      setIsEditModalOpen(false);
+      setEditingBlog(null);
+      form.resetFields();
+      fetchBlogs(); 
+    } catch (error) {
+      message.error("Failed to update blog");
+    }
   };
 
-  const handleDelete = (id) => {
-    setBlogs((prev) => prev.filter((blog) => blog.id !== id));
-    message.success("Blog deleted.");
+  const handleDelete = async (id) => {
+    try {
+      await apiDelete(`/blogs/${id}`);
+      message.success("Blog deleted");
+      fetchBlogs();
+    } catch {
+      message.error("Delete failed");
+    }
   };
 
   const columns = [
@@ -110,14 +96,19 @@ export default function BlogList() {
       title: "Subcategories",
       dataIndex: "subcategories",
       key: "subcategories",
-      render: (subcategories) => subcategories?.join(", "), // Display subcategories
+      render: (subcategories) => subcategories?.join(", "),
     },
     {
       title: "Image",
       key: "coverImage",
       render: (_, record) => (
-        <img src={record.coverImage} alt={record.title} width={100} height={60} />
-      ), // Display image
+        <img
+          src={record.coverImage}
+          alt={record.title}
+          width={100}
+          height={60}
+        />
+      ),
     },
     {
       title: "Status",
@@ -137,7 +128,7 @@ export default function BlogList() {
           </Button>
           <Popconfirm
             title="Are you sure to delete this blog?"
-            onConfirm={() => handleDelete(record.id)}
+            onConfirm={() => handleDelete(record._id)}
             okText="Yes"
             cancelText="No"
           >
@@ -153,7 +144,14 @@ export default function BlogList() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <h2 className="text-2xl font-semibold mb-6">Blog List</h2>
-      <Table dataSource={blogs} columns={columns} rowKey="id" bordered />
+
+      {loading ? (
+        <div className="text-center">
+          <Spin size="large" />
+        </div>
+      ) : (
+        <Table dataSource={blogs} columns={columns} rowKey="_id" bordered />
+      )}
 
       {/* Edit Modal */}
       <Modal
@@ -167,14 +165,16 @@ export default function BlogList() {
           <Form.Item
             label="Title"
             name="title"
-            rules={[{ required: true, message: "Title is required" }]}>
+            rules={[{ required: true, message: "Title is required" }]}
+          >
             <Input />
           </Form.Item>
 
           <Form.Item
             label="Content"
             name="content"
-            rules={[{ required: true, message: "Content is required" }]}>
+            rules={[{ required: true, message: "Content is required" }]}
+          >
             <Input.TextArea rows={4} />
           </Form.Item>
 
@@ -214,7 +214,11 @@ export default function BlogList() {
             <Input />
           </Form.Item>
 
-          <Form.Item label="Status" name="status" rules={[{ required: true }]}>
+          <Form.Item
+            label="Status"
+            name="status"
+            rules={[{ required: true }]}
+          >
             <Select options={[{ value: "published" }, { value: "draft" }]} />
           </Form.Item>
         </Form>
