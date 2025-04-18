@@ -32,7 +32,7 @@ export default function WPStyleBlogTable() {
           id: blog._id,
           slug: blog.slug,
           title: blog.title,
-          author: blog.author?.name || "Unknown",
+          author: blog.author?._id || "Unknown",
           categories: blog.categories || [],
           tags: blog.tags || [],
           comments: blog.comments?.length || 0,

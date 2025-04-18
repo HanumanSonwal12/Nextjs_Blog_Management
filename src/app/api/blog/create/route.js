@@ -3,6 +3,7 @@ import connectDB from '@/lib/db';
 import Blog from '@/models/blog';
 import jwt from 'jsonwebtoken';
 import slugify from 'slugify';
+import User from '@/models/User'; 
 
 export async function POST(req) {
   try {
@@ -68,32 +69,19 @@ export async function POST(req) {
       excerpt: excerpt || '',
       metaKeywords: metaKeywords || '',
       seoTitle: seoTitle || '',
-      author: decoded.id,
+      author: decoded.userId, 
     });
 
     const savedBlog = await newBlog.save();
+
+    const populatedBlog = await Blog.findById(savedBlog._id).populate('author', 'name email');
 
     return NextResponse.json({
       status: 201,
       success: true,
       message: "Blog created successfully!",
-      blog: {
-        _id: savedBlog._id,
-        title: savedBlog.title,
-        slug: savedBlog.slug, 
-        content: savedBlog.content,
-        image: savedBlog.image,
-        tags: savedBlog.tags,
-        categories: savedBlog.categories,
-        excerpt: savedBlog.excerpt,
-        metaKeywords: savedBlog.metaKeywords,
-        seoTitle: savedBlog.seoTitle,
-        status: savedBlog.status,
-        createdAt: savedBlog.createdAt,
-        updatedAt: savedBlog.updatedAt
-      }
+      blog: populatedBlog
     }, { status: 201 });
-    
 
   } catch (error) {
     console.error("Blog creation error:", error);
