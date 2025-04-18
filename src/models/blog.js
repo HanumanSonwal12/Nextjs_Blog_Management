@@ -2,15 +2,18 @@ import mongoose from 'mongoose';
 
 const blogSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  slug: { type: String, unique: true, required: true }, // Unique slug
+  slug: { type: String, unique: true, required: true },
   content: { type: String, required: true },
-  image: { type: String, required: true }, // Image required
+  image: { type: String, required: true },
   status: { type: String, enum: ['draft', 'published'], default: 'draft' },
   seoTitle: { type: String },
   metaKeywords: { type: String },
   excerpt: { type: String },
   tags: { type: [String], default: [] },
-  categories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }], // Optional
+  categories: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category'
+  }],
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

@@ -1,9 +1,28 @@
-import React from 'react'
+"use client";
+import React, { useState } from 'react';
+import { Form, Button } from 'antd';
+import CategorySelect from '@/components/CategorySelect';
 
-function page() {
+const BlogForm = () => {
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const handleFinish = (values) => {
+    console.log('Form values:', values);
+    // values.category => category ID
+  };
+
   return (
-    <div>page</div>
-  )
-}
+    <Form onFinish={handleFinish} layout="vertical">
+      <Form.Item label="Category" name="category" rules={[{ required: true }]}>
+        <CategorySelect
+          value={selectedCategory}
+          onChange={value => setSelectedCategory(value)}
+        />
+      </Form.Item>
 
-export default page
+      <Button type="primary" htmlType="submit">Submit</Button>
+    </Form>
+  );
+};
+
+export default BlogForm;
