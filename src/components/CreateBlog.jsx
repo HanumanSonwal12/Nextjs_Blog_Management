@@ -35,18 +35,18 @@ export default function CreateBlog({
         subcategories: initialData.subcategories?.join(", "),
         excerpt: initialData.excerpt,
         seoTitle: initialData.seoTitle,
-        metaDescription: initialData.metaDescription,
+        metaDescription: initialData.metaKeywords,
       });
 
       setIsDraft(initialData.status === "draft");
 
-      if (initialData.featuredImage) {
+      if (initialData.image) {
         setFileList([
           {
             uid: "-1",
-            name: initialData.featuredImage,
+            name: initialData.image,
             status: "done",
-            url: initialData.featuredImage,
+            url: initialData.image,
           },
         ]);
       }
@@ -71,8 +71,8 @@ export default function CreateBlog({
         : [],
       excerpt: values.excerpt,
       seoTitle: values.seoTitle,
-      metaDescription: values.metaDescription,
-      featuredImage: fileList.length > 0 ? fileList[0].name : null,
+      metaDescription: values.metaKeywords,
+      image: fileList.length > 0 ? fileList[0].name : null,
       status: isDraft ? "draft" : "published",
     };
 
@@ -81,7 +81,7 @@ export default function CreateBlog({
         await updateData(`/blog/update/${initialData.id}`, formattedData);
         message.success(isDraft ? "Draft updated!" : "Blog updated and published!");
       } else if (createData) {
-        await createData("/api/create-blog", formattedData);
+        await createData("/blog/create", formattedData);
         message.success(isDraft ? "Draft saved!" : "Blog published!");
       } else {
         throw new Error("No API method provided.");
@@ -156,7 +156,7 @@ export default function CreateBlog({
           </Form.Item>
         </div>
 
-        <Form.Item label="Featured Image" name="featuredImage">
+        <Form.Item label="Featured Image" name="image">
           <Upload
             beforeUpload={() => false}
             fileList={fileList}
@@ -194,13 +194,13 @@ export default function CreateBlog({
           <Form.Item
             label={
               <span>
-                Meta Description&nbsp;
+                Meta Keywords&nbsp;
                 <Tooltip title="Brief summary for search engine results">
                   <InfoCircleOutlined />
                 </Tooltip>
               </span>
             }
-            name="metaDescription"
+            name="metaKeywords"
           >
             <Input.TextArea
               rows={2}
