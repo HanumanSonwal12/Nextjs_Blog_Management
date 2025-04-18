@@ -13,6 +13,8 @@ import {
 } from "antd";
 import { UploadOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { createData, updateData } from "@/utils/api";
+import TextEditor from "./TextEditor";
+import UploadImage from "./UploadImage";
 
 export default function CreateBlog({
   initialData = null,
@@ -24,29 +26,33 @@ export default function CreateBlog({
   const [form] = Form.useForm();
   const [isDraft, setIsDraft] = useState(true);
   const [fileList, setFileList] = useState([]);
+  const [editorContent, setEditorContent] = useState("");
+  const handleUploadSuccess = (url) => {
+    form.setFieldsValue({ image: url });
+  }
 
   useEffect(() => {
     if (initialData && isEditing) {
       form.setFieldsValue({
         title: initialData.title,
-        content: initialData.content,
+        // content: initialData.content,
         tags: initialData.tags?.join(", "),
         categories: initialData.categories?.join(", "),
         subcategories: initialData.subcategories?.join(", "),
         excerpt: initialData.excerpt,
         seoTitle: initialData.seoTitle,
-        metaDescription: initialData.metaDescription,
+        metaDescription: initialData.metaKeywords,
       });
-
+      setEditorContent(initialData.content || "");
       setIsDraft(initialData.status === "draft");
 
-      if (initialData.featuredImage) {
+      if (initialData.image) {
         setFileList([
           {
             uid: "-1",
-            name: initialData.featuredImage,
+            name: initialData.image,
             status: "done",
-            url: initialData.featuredImage,
+            url: initialData.image,
           },
         ]);
       }
@@ -61,7 +67,7 @@ export default function CreateBlog({
     const formattedData = {
       ...(initialData || {}),
       title: values.title,
-      content: values.content,
+      content: editorContent,
       tags: values.tags ? values.tags.split(",").map((tag) => tag.trim()) : [],
       categories: values.categories
         ? values.categories.split(",").map((cat) => cat.trim())
@@ -71,8 +77,8 @@ export default function CreateBlog({
         : [],
       excerpt: values.excerpt,
       seoTitle: values.seoTitle,
-      metaDescription: values.metaDescription,
-      featuredImage: fileList.length > 0 ? fileList[0].name : null,
+      metaDescription: values.metaKeywords,
+      image: fileList.length > 0 ? fileList[0].name : null,
       status: isDraft ? "draft" : "published",
     };
 
@@ -81,7 +87,7 @@ export default function CreateBlog({
         await updateData(`/blog/update/${initialData.id}`, formattedData);
         message.success(isDraft ? "Draft updated!" : "Blog updated and published!");
       } else if (createData) {
-        await createData("/api/create-blog", formattedData);
+        await createData("/blog/create", formattedData);
         message.success(isDraft ? "Draft saved!" : "Blog published!");
       } else {
         throw new Error("No API method provided.");
@@ -124,14 +130,22 @@ export default function CreateBlog({
 
         <Form.Item
           label="Post Content"
-          name="content"
-          rules={[{ required: true, message: "Please enter content" }]}
+          // name="content"
+          required
+          validateStatus={!editorContent ? "error" : ""}
+          help={!editorContent ? "Please enter content" : ""}
+          // rules={[{ required: true, message: "Please enter content" }]}
         >
-          <Input.TextArea
+          {/* <Input.TextArea
             rows={10}
             placeholder="Write your content here..."
             className="resize-none"
-          />
+          /> */}
+          <TextEditor
+    previousValue={editorContent}
+    updatedValue={(content) => setEditorContent(content)}
+    height={200}
+  />
         </Form.Item>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -156,7 +170,7 @@ export default function CreateBlog({
           </Form.Item>
         </div>
 
-        <Form.Item label="Featured Image" name="featuredImage">
+        {/* <Form.Item label="Featured Image" name="image">
           <Upload
             beforeUpload={() => false}
             fileList={fileList}
@@ -167,8 +181,21 @@ export default function CreateBlog({
               {fileList.length > 0 ? "Change Image" : "Upload Image"}
             </Button>
           </Upload>
-        </Form.Item>
+        </Form.Item> */}
 
+<Form.Item
+  label="Image"
+  name="image"
+  rules={[{ required: true, message: "Please upload a featured image!" }]}
+  valuePropName="image"
+  getValueFromEvent={(e) => e} // pass file object or URL to form value
+>
+ <UploadImage
+          fileList={fileList}
+          setFileList={setFileList}
+          onUploadSuccess={handleUploadSuccess}
+        />
+</Form.Item>
         <Form.Item label="Excerpt" name="excerpt">
           <Input.TextArea
             rows={3}
@@ -194,13 +221,13 @@ export default function CreateBlog({
           <Form.Item
             label={
               <span>
-                Meta Description&nbsp;
+                Meta Keywords&nbsp;
                 <Tooltip title="Brief summary for search engine results">
                   <InfoCircleOutlined />
                 </Tooltip>
               </span>
             }
-            name="metaDescription"
+            name="metaKeywords"
           >
             <Input.TextArea
               rows={2}
