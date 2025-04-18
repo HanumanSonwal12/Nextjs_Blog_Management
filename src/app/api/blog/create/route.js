@@ -14,7 +14,7 @@ export async function POST(req) {
       return NextResponse.json({
         status: 401,
         success: false,
-        message: "Unauthorized: No token provided.",
+        message: "Please login first. Token not found.",
       }, { status: 401 });
     }
 
@@ -27,6 +27,15 @@ export async function POST(req) {
         success: false,
         message: "Invalid or expired token.",
       }, { status: 403 });
+    }
+
+    const existingUser = await User.findById(decoded.userId);
+    if (!existingUser) {
+      return NextResponse.json({
+        status: 401,
+        success: false,
+        message: "Invalid user. Please login again.",
+      }, { status: 401 });
     }
 
     const body = await req.json();
@@ -73,9 +82,12 @@ export async function POST(req) {
     });
 
     const savedBlog = await newBlog.save();
-    await savedBlog.populate('categories', 'name slug');
+    
+    const populatedBlog = await Blog.findById(savedBlog._id)
+      .populate('categories', 'name slug description')
+      .populate('author', 'name email');
 
-    const populatedBlog = await Blog.findById(savedBlog._id).populate('author', 'name email');
+      console.log("Populated blog:", populatedBlog);
 
     return NextResponse.json({
       status: 201,
@@ -94,3 +106,4 @@ export async function POST(req) {
     }, { status: 500 });
   }
 }
+

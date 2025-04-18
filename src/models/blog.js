@@ -12,13 +12,12 @@ const blogSchema = new mongoose.Schema({
   tags: { type: [String], default: [] },
   categories: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Category'
+    ref: 'Category', // ✅ Must match model name exactly
   }],
   author: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  }
+    ref: 'User', // ✅ Must match model name
+  },
 }, {
   timestamps: true
 });

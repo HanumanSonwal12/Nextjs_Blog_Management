@@ -19,6 +19,7 @@ export async function POST(req) {
     const newCategory = await Category.create({
       name,
       slug,
+      description,
       parent: parent || null
     });
 

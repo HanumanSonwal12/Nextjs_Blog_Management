@@ -8,7 +8,6 @@ const CategorySelect = ({ value, onChange }) => {
   const [treeData, setTreeData] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Recursive function to format AntD Tree data
   const formatTreeData = (categories) =>
     categories.map((cat) => ({
       title: cat.name,
