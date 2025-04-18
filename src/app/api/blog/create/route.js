@@ -73,6 +73,7 @@ export async function POST(req) {
     });
 
     const savedBlog = await newBlog.save();
+    await savedBlog.populate('categories', 'name slug');
 
     const populatedBlog = await Blog.findById(savedBlog._id).populate('author', 'name email');
 
