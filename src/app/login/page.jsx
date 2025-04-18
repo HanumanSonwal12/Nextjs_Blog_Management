@@ -17,7 +17,7 @@ const Page = () => {
       if (response.data.status == 201) {
         Cookies.set('token', response.data.token);
         message.success('Login successful!');
-        router.push('/blogs');
+        router.push('/');
       } else {
         message.error('Login failed');
       }
