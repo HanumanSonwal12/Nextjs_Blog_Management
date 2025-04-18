@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import Blog from "@/models/blog";
 import connectDB from "@/lib/db";
+import blog from "@/models/blog";
 
 export async function GET(req) {
   try {
@@ -31,11 +31,11 @@ export async function GET(req) {
       try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        const allBlogs = await Blog.find({}, projection)
+        const allblogs = await blog.find({}, projection)
           .sort({ createdAt: -1 })
           .populate(populateFields);
 
-        const blogsWithSeo = allBlogs.map((blog) => ({
+        const blogsWithSeo = allblogs.map((blog) => ({
           ...blog.toObject(),
           seo: {
             seoTitle: blog.seoTitle,
@@ -51,11 +51,11 @@ export async function GET(req) {
           blogs: blogsWithSeo,
         });
       } catch (err) {
-        const publicBlogs = await Blog.find({ status: "published" }, projection)
+        const publicblogs = await blog.find({ status: "published" }, projection)
           .sort({ createdAt: -1 })
           .populate(populateFields);
 
-        const blogsWithSeo = publicBlogs.map((blog) => ({
+        const blogsWithSeo = publicblogs.map((blog) => ({
           ...blog.toObject(),
           seo: {
             seoTitle: blog.seoTitle,
@@ -72,11 +72,11 @@ export async function GET(req) {
         });
       }
     } else {
-      const publicBlogs = await Blog.find({ status: "published" }, projection)
+      const publicblogs = await blog.find({ status: "published" }, projection)
         .sort({ createdAt: -1 })
         .populate(populateFields);
 
-      const blogsWithSeo = publicBlogs.map((blog) => ({
+      const blogsWithSeo = publicblogs.map((blog) => ({
         ...blog.toObject(),
         seo: {
           seoTitle: blog.seoTitle,
