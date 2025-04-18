@@ -10,16 +10,31 @@ export async function POST(req) {
   const body = await req.json();
   const { name, email, password } = body;
 
-  // Check if user already exists
-  const userExists = await User.findOne({ email });
-  if (userExists) {
-    return NextResponse.json({ error: 'User already exists' }, { status: 400 });
+  if (!name || !email || !password) {
+    return NextResponse.json(
+      {
+        status: 400,
+        success: false,
+        message: 'Name, email, and password are required.',
+      },
+      { status: 400 }
+    );
   }
 
-  // Hash the password
+  const userExists = await User.findOne({ email });
+  if (userExists) {
+    return NextResponse.json(
+      {
+        status: 400,
+        success: false,
+        message: 'User already exists with this email.',
+      },
+      { status: 400 }
+    );
+  }
+
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Create new user
   const newUser = new User({
     name,
     email,
@@ -28,12 +43,32 @@ export async function POST(req) {
 
   await newUser.save();
 
-  // Create JWT token
-  const token = jwt.sign({ id: newUser._id, name: newUser.name, email: newUser.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+  const token = jwt.sign(
+    { id: newUser._id, name: newUser.name, email: newUser.email },
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
+  );
 
-  // Set token in cookies
-  const res = NextResponse.json({ message: 'User registered successfully' });
-  res.cookies.set('token', token, { httpOnly: true, secure: true });
+  const res = NextResponse.json(
+    {
+      status: 201,
+      success: true,
+      message: 'User registered successfully',
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+      },
+    },
+    { status: 201 }
+  );
+
+  res.cookies.set('token', token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    path: '/',
+  });
 
   return res;
 }
