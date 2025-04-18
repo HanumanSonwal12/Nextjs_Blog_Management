@@ -14,6 +14,7 @@ import {
 import { UploadOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { createData, updateData } from "@/utils/api";
 import TextEditor from "./TextEditor";
+import UploadImage from "./UploadImage";
 
 export default function CreateBlog({
   initialData = null,
@@ -26,6 +27,9 @@ export default function CreateBlog({
   const [isDraft, setIsDraft] = useState(true);
   const [fileList, setFileList] = useState([]);
   const [editorContent, setEditorContent] = useState("");
+  const handleUploadSuccess = (url) => {
+    form.setFieldsValue({ image: url });
+  }
 
   useEffect(() => {
     if (initialData && isEditing) {
@@ -166,7 +170,7 @@ export default function CreateBlog({
           </Form.Item>
         </div>
 
-        <Form.Item label="Featured Image" name="image">
+        {/* <Form.Item label="Featured Image" name="image">
           <Upload
             beforeUpload={() => false}
             fileList={fileList}
@@ -177,8 +181,21 @@ export default function CreateBlog({
               {fileList.length > 0 ? "Change Image" : "Upload Image"}
             </Button>
           </Upload>
-        </Form.Item>
+        </Form.Item> */}
 
+<Form.Item
+  label="Image"
+  name="image"
+  rules={[{ required: true, message: "Please upload a featured image!" }]}
+  valuePropName="image"
+  getValueFromEvent={(e) => e} // pass file object or URL to form value
+>
+ <UploadImage
+          fileList={fileList}
+          setFileList={setFileList}
+          onUploadSuccess={handleUploadSuccess}
+        />
+</Form.Item>
         <Form.Item label="Excerpt" name="excerpt">
           <Input.TextArea
             rows={3}
