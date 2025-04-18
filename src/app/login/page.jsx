@@ -14,7 +14,7 @@ const Page = () => {
     try {
       const response = await axios.post('/api/auth/login', values);
       console.log(response ,"response")
-      if (response.data.status == 201) {
+      if (response.data.status == 200) {
         Cookies.set('token', response.data.token);
         message.success('Login successful!');
         router.push('/');

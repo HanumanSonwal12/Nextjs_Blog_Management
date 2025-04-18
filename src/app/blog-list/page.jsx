@@ -52,7 +52,7 @@ export default function WPStyleBlogTable() {
   };
 
   const handleEdit = (blog) => {
-    console.log(blog,'hhhh')
+    // console.log(blog,'hhhh')
     setEditingBlog(blog);
     setIsCreateModalVisible(true);
   };

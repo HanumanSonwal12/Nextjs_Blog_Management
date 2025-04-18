@@ -13,6 +13,7 @@ import {
 } from "antd";
 import { UploadOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { createData, updateData } from "@/utils/api";
+import TextEditor from "./TextEditor";
 
 export default function CreateBlog({
   initialData = null,
@@ -24,12 +25,13 @@ export default function CreateBlog({
   const [form] = Form.useForm();
   const [isDraft, setIsDraft] = useState(true);
   const [fileList, setFileList] = useState([]);
+  const [editorContent, setEditorContent] = useState("");
 
   useEffect(() => {
     if (initialData && isEditing) {
       form.setFieldsValue({
         title: initialData.title,
-        content: initialData.content,
+        // content: initialData.content,
         tags: initialData.tags?.join(", "),
         categories: initialData.categories?.join(", "),
         subcategories: initialData.subcategories?.join(", "),
@@ -37,7 +39,7 @@ export default function CreateBlog({
         seoTitle: initialData.seoTitle,
         metaDescription: initialData.metaKeywords,
       });
-
+      setEditorContent(initialData.content || "");
       setIsDraft(initialData.status === "draft");
 
       if (initialData.image) {
@@ -61,7 +63,7 @@ export default function CreateBlog({
     const formattedData = {
       ...(initialData || {}),
       title: values.title,
-      content: values.content,
+      content: editorContent,
       tags: values.tags ? values.tags.split(",").map((tag) => tag.trim()) : [],
       categories: values.categories
         ? values.categories.split(",").map((cat) => cat.trim())
@@ -124,14 +126,22 @@ export default function CreateBlog({
 
         <Form.Item
           label="Post Content"
-          name="content"
-          rules={[{ required: true, message: "Please enter content" }]}
+          // name="content"
+          required
+          validateStatus={!editorContent ? "error" : ""}
+          help={!editorContent ? "Please enter content" : ""}
+          // rules={[{ required: true, message: "Please enter content" }]}
         >
-          <Input.TextArea
+          {/* <Input.TextArea
             rows={10}
             placeholder="Write your content here..."
             className="resize-none"
-          />
+          /> */}
+          <TextEditor
+    previousValue={editorContent}
+    updatedValue={(content) => setEditorContent(content)}
+    height={200}
+  />
         </Form.Item>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
