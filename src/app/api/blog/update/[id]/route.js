@@ -3,12 +3,12 @@ import jwt from "jsonwebtoken";
 import Blog from "@/models/blog";
 import connectDB from "@/lib/db";
 
-export async function PUT(req, { params }) {
+export async function DELETE(req, { params }) {
   try {
     await connectDB();
-    console.log(process.env.JWT_SECRET , "check  JWT_SECRET")
+    const { id } = params;
 
-    const { id } = params; 
+    // Get Token
     let token;
     const authHeader = req.headers.get("authorization");
 
@@ -26,68 +26,51 @@ export async function PUT(req, { params }) {
         {
           status: 401,
           success: false,
-          message: "Authentication required: No token provided",
+          message: "Token missing. Please login.",
         },
         { status: 401 }
       );
     }
 
+    // Decode token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.userId;
+    const userId = decoded.id;
 
-    const { title, content, status, seoTitle, metaKeywords, excerpt } = await req.json();
-
-    if (!title || !content) {
-      return NextResponse.json(
-        {
-          status: 400,
-          success: false,
-          message: "Title and Content are required",
-        },
-        { status: 400 }
-      );
-    }
-
+    // Find blog
     const blog = await Blog.findById(id);
-
     if (!blog) {
       return NextResponse.json(
         {
           status: 404,
           success: false,
-          message: "Blog not found",
+          message: "Blog not found.",
         },
         { status: 404 }
       );
     }
 
-    if (blog.author.toString() !== userId) {
+    // Authorization check
+    if (!blog.author || blog.author.toString() !== userId) {
       return NextResponse.json(
         {
           status: 403,
           success: false,
-          message: "You are not authorized to update this blog",
+          message: "You are not authorized to delete this blog.",
         },
         { status: 403 }
       );
     }
 
-    blog.title = title || blog.title;
-    blog.content = content || blog.content;
-    blog.status = status || blog.status; 
-    blog.seoTitle = seoTitle || blog.seoTitle;
-    blog.metaKeywords = metaKeywords || blog.metaKeywords;
-    blog.excerpt = excerpt || blog.excerpt;
-
-    await blog.save();
+    // Delete blog
+    await Blog.findByIdAndDelete(id);
 
     return NextResponse.json({
       status: 200,
       success: true,
-      message: "Blog updated successfully",
-      blog: blog,
+      message: "Blog deleted successfully.",
     });
   } catch (error) {
+    console.error("Error during DELETE:", error.message);
     return NextResponse.json(
       {
         status: 500,

@@ -9,7 +9,7 @@ import {
   CommentOutlined,
   PlusOutlined
 } from "@ant-design/icons";
-import { fetchData } from "@/utils/api";
+import { deleteData, fetchData } from "@/utils/api";
 import CreateBlog from "@/components/CreateBlog";
 
 export default function WPStyleBlogTable() {
@@ -60,7 +60,7 @@ export default function WPStyleBlogTable() {
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`/api/delete-blog/${id}`, { method: "DELETE" });
+      await deleteData(`/blog/delete/${id}`);
       message.success("Blog deleted successfully");
       setBlogs((prev) => prev.filter((blog) => blog.id !== id));
     } catch (error) {

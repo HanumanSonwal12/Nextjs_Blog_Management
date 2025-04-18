@@ -6,9 +6,9 @@ import connectDB from "@/lib/db";
 export async function DELETE(req, { params }) {
   try {
     await connectDB();
-
     const { id } = params;
 
+    // Get Token
     let token;
     const authHeader = req.headers.get("authorization");
 
@@ -32,11 +32,12 @@ export async function DELETE(req, { params }) {
       );
     }
 
+    // Decode token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
 
+    // Find blog
     const blog = await Blog.findById(id);
-
     if (!blog) {
       return NextResponse.json(
         {
@@ -48,6 +49,7 @@ export async function DELETE(req, { params }) {
       );
     }
 
+    // Authorization check
     if (blog.author.toString() !== userId) {
       return NextResponse.json(
         {
@@ -59,6 +61,7 @@ export async function DELETE(req, { params }) {
       );
     }
 
+    // Delete blog
     await Blog.findByIdAndDelete(id);
 
     return NextResponse.json({

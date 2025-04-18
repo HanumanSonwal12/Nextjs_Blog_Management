@@ -2,16 +2,16 @@ import mongoose from 'mongoose';
 
 const blogSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  slug: { type: String, required: true, unique: true },
   content: { type: String, required: true },
-  image: { type: String, required: true },
-  tags: [{ type: String }],
-  categories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
-  status: { type: String, enum: ['draft', 'published'], default: 'draft' },
-  excerpt: { type: String },
-  metaKeywords: { type: String },
+  status: { type: String, default: 'draft' },
   seoTitle: { type: String },
-  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-}, { timestamps: true });
+  metaKeywords: { type: String },
+  excerpt: { type: String },
+  tags: { type: [String], default: [] },  // Tags array added
+  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+}, {
+  timestamps: true
+});
 
-export default mongoose.models.Blog || mongoose.model('Blog', blogSchema);
+const Blog = mongoose.models.Blog || mongoose.model('Blog', blogSchema);
+export default Blog;
