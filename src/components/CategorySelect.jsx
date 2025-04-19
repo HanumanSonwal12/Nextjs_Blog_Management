@@ -20,7 +20,7 @@ const CategorySelect = ({ value, onChange }) => {
     const fetchCategories = async () => {
       setLoading(true);
       try {
-        const res = await axios.get('/api/categories/tree');
+        const res = await axios.get('/api/categories');
         const formatted = formatTreeData(res.data.data || []);
         setTreeData(formatted);
       } catch (err) {

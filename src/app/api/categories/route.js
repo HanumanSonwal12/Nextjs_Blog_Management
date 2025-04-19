@@ -1,30 +1,51 @@
-import { NextResponse } from 'next/server';
-import connectDB from '@/lib/db';
-import Category from '@/models/category';
-import slugify from 'slugify';
+import { NextResponse } from "next/server";
+import connectDB from "@/lib/db";
+import Category from "@/models/category";
 
-export async function POST(req) {
+const buildCategoryTree = (categories, parentId = null) => {
+  const tree = [];
+
+  categories.forEach((category) => {
+    const isTopLevel = parentId === null && !category.parent;
+    const isChild = category.parent?.toString() === parentId?.toString();
+
+    if (isTopLevel || isChild) {
+      const children = buildCategoryTree(categories, category._id);
+
+      tree.push({
+        _id: category._id,
+        name: category.name,
+        slug: category.slug,
+        description: category.description,
+        parent: category.parent,
+        children,
+      });
+    }
+  });
+
+  return tree;
+};
+
+export async function GET(req) {
   await connectDB();
 
   try {
-    const body = await req.json();
-    const { name, parent } = body;
+    const { searchParams } = new URL(req.url);
+    const search = searchParams.get("search");
 
-    if (!name) {
-      return NextResponse.json({ success: false, message: "Name is required" }, { status: 400 });
+    const query = {};
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
     }
 
-    const slug = slugify(name, { lower: true });
+    const categories = await Category.find(query).lean();
+    const tree = buildCategoryTree(categories);
 
-    const newCategory = await Category.create({
-      name,
-      slug,
-      description,
-      parent: parent || null
-    });
-
-    return NextResponse.json({ success: true, message: "Category created", category: newCategory }, { status: 201 });
+    return NextResponse.json({ status: 200, success: true, data: tree });
   } catch (error) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: error.message },
+      { status: 500 }
+    );
   }
 }

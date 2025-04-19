@@ -16,7 +16,10 @@ export async function GET(req, { params }) {
       blog = await Blog.findById(value).populate("author", "name email");
     }
     if (!blog) {
-      blog = await Blog.findOne({ slug: value }).populate("author", "name email");
+      blog = await Blog.findOne({ slug: value }).populate(
+        "author",
+        "name email"
+      );
     }
 
     if (!blog) {

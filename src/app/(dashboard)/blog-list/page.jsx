@@ -127,11 +127,12 @@ export default function WPStyleBlogTable() {
       key: "categories",
       render: (categories) =>
         categories.map((cat) => (
-          <Tag color="blue" key={cat}>
-            {cat}
+          <Tag color="blue" key={cat._id}>
+            {cat.name}
           </Tag>
         )),
     },
+    
     {
       title: "Tags",
       dataIndex: "tags",
