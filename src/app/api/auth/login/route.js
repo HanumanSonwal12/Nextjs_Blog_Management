@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
-import connectDB from '@/lib/db';
-import jwt from 'jsonwebtoken';
-import User from '@/models/User';
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import connectDB from "@/lib/db";
+import jwt from "jsonwebtoken";
+import User from "@/models/User";
 
 export async function POST(req) {
   await connectDB();
@@ -15,7 +15,7 @@ export async function POST(req) {
       {
         status: 400,
         success: false,
-        message: 'Email and password are required.',
+        message: "Email and password are required.",
       },
       { status: 400 }
     );
@@ -27,7 +27,7 @@ export async function POST(req) {
       {
         status: 404,
         success: false,
-        message: 'User not found with this email.',
+        message: "User not found with this email.",
       },
       { status: 404 }
     );
@@ -39,7 +39,7 @@ export async function POST(req) {
       {
         status: 401,
         success: false,
-        message: 'Invalid password.',
+        message: "Invalid password.",
       },
       { status: 401 }
     );
@@ -48,14 +48,14 @@ export async function POST(req) {
   const token = jwt.sign(
     { userId: user._id, name: user.name, email: user.email },
     process.env.JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: "7d" }
   );
 
   const res = NextResponse.json(
     {
       status: 200,
       success: true,
-      message: 'Login successful',
+      message: "Login successful",
       user: {
         id: user._id,
         name: user.name,
@@ -66,11 +66,11 @@ export async function POST(req) {
     { status: 200 }
   );
 
-  res.cookies.set('token', token, {
+  res.cookies.set("token", token, {
     httpOnly: true,
     secure: true,
-    sameSite: 'strict',
-    path: '/',
+    sameSite: "strict",
+    path: "/",
   });
 
   return res;

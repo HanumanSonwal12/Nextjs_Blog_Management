@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
-import connectDB from '@/lib/db';
-import jwt from 'jsonwebtoken';
-import Blog from '@/models/blog';
+import { NextResponse } from "next/server";
+import connectDB from "@/lib/db";
+import jwt from "jsonwebtoken";
+import Blog from "@/models/blog";
 
 export async function PUT(req, { params }) {
   try {
@@ -19,7 +19,11 @@ export async function PUT(req, { params }) {
 
     if (!token) {
       return NextResponse.json(
-        { status: 401, success: false, message: "Authentication required: No token provided" },
+        {
+          status: 401,
+          success: false,
+          message: "Authentication required: No token provided",
+        },
         { status: 401 }
       );
     }
@@ -27,11 +31,16 @@ export async function PUT(req, { params }) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.userId;
 
-    const { title, content, status, seoTitle, metaKeywords, excerpt, tags } = await req.json();
+    const { title, content, status, seoTitle, metaKeywords, excerpt, tags } =
+      await req.json();
 
     if (!title || !content) {
       return NextResponse.json(
-        { status: 400, success: false, message: "Title and Content are required" },
+        {
+          status: 400,
+          success: false,
+          message: "Title and Content are required",
+        },
         { status: 400 }
       );
     }
@@ -46,7 +55,11 @@ export async function PUT(req, { params }) {
 
     if (blog.author.toString() !== userId) {
       return NextResponse.json(
-        { status: 403, success: false, message: "You are not authorized to update this blog" },
+        {
+          status: 403,
+          success: false,
+          message: "You are not authorized to update this blog",
+        },
         { status: 403 }
       );
     }
@@ -67,7 +80,6 @@ export async function PUT(req, { params }) {
       message: "Blog updated successfully",
       blog,
     });
-
   } catch (error) {
     return NextResponse.json(
       {
@@ -97,7 +109,11 @@ export async function PATCH(req, { params }) {
 
     if (!token) {
       return NextResponse.json(
-        { status: 401, success: false, message: "Authentication required: No token provided" },
+        {
+          status: 401,
+          success: false,
+          message: "Authentication required: No token provided",
+        },
         { status: 401 }
       );
     }
@@ -124,7 +140,11 @@ export async function PATCH(req, { params }) {
 
     if (blog.author.toString() !== userId) {
       return NextResponse.json(
-        { status: 403, success: false, message: "You are not authorized to update this blog" },
+        {
+          status: 403,
+          success: false,
+          message: "You are not authorized to update this blog",
+        },
         { status: 403 }
       );
     }
@@ -138,7 +158,6 @@ export async function PATCH(req, { params }) {
       message: "Blog status updated successfully",
       blog,
     });
-
   } catch (error) {
     return NextResponse.json(
       {
@@ -151,4 +170,3 @@ export async function PATCH(req, { params }) {
     );
   }
 }
-

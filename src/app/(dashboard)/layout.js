@@ -1,7 +1,8 @@
 
-import "./globals.css";
+import "../globals.css";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import "antd/dist/reset.css";
+import SidebarWrapper from "@/components/layout/SidebarWrapper";
 
 export const metadata = {
   title: "Blog Management System",
@@ -14,7 +15,9 @@ export default function RootLayout({ children }) {
       <body className={` antialiased`}>
      
           <AntdRegistry>
+            <SidebarWrapper>
               {children}
+            </SidebarWrapper>
           </AntdRegistry>
       </body>
     </html>

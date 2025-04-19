@@ -35,7 +35,7 @@ export async function DELETE(req, { params }) {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const userId = decoded.userId ;
+    const userId = decoded.userId;
 
     const blog = await Blog.findById(id);
     if (!blog) {

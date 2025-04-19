@@ -17,6 +17,7 @@
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.6.0",
     "formidable": "^3.5.2",
+    "jose": "^6.0.10",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.13.2",

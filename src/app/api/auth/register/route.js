@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
-import User from '@/models/User';
-import connectDB from '@/lib/db';
-import jwt from 'jsonwebtoken';
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import User from "@/models/User";
+import connectDB from "@/lib/db";
+import jwt from "jsonwebtoken";
 
 export async function POST(req) {
   await connectDB();
@@ -15,7 +15,7 @@ export async function POST(req) {
       {
         status: 400,
         success: false,
-        message: 'Name, email, and password are required.',
+        message: "Name, email, and password are required.",
       },
       { status: 400 }
     );
@@ -27,7 +27,7 @@ export async function POST(req) {
       {
         status: 400,
         success: false,
-        message: 'User already exists with this email.',
+        message: "User already exists with this email.",
       },
       { status: 400 }
     );
@@ -46,14 +46,14 @@ export async function POST(req) {
   const token = jwt.sign(
     { id: newUser._id, name: newUser.name, email: newUser.email },
     process.env.JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: "7d" }
   );
 
   const res = NextResponse.json(
     {
       status: 201,
       success: true,
-      message: 'User registered successfully',
+      message: "User registered successfully",
       user: {
         id: newUser._id,
         name: newUser.name,
@@ -63,11 +63,11 @@ export async function POST(req) {
     { status: 201 }
   );
 
-  res.cookies.set('token', token, {
+  res.cookies.set("token", token, {
     httpOnly: true,
     secure: true,
-    sameSite: 'strict',
-    path: '/',
+    sameSite: "strict",
+    path: "/",
   });
 
   return res;

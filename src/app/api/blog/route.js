@@ -6,8 +6,7 @@ import User from "@/models/User";
 import { isValidObjectId } from "mongoose";
 
 const getBlogsWithSEO = async (filter) => {
-  const blogs = await Blog
-    .find(filter, { __v: 0 })
+  const blogs = await Blog.find(filter, { __v: 0 })
     .sort({ createdAt: -1 })
     .populate({
       path: "author",
@@ -93,7 +92,6 @@ export async function GET(req) {
           blogs,
         });
       } catch (err) {
-        
         filter.status = "published";
         const blogs = await getBlogsWithSEO(filter);
         return NextResponse.json({
@@ -113,14 +111,15 @@ export async function GET(req) {
       message: "Public user: Only published blogs",
       blogs,
     });
-
   } catch (error) {
-    return NextResponse.json({
-      status: 500,
-      success: false,
-      message: "Internal Server Error",
-      error: error.message,
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        status: 500,
+        success: false,
+        message: "Internal Server Error",
+        error: error.message,
+      },
+      { status: 500 }
+    );
   }
 }
-

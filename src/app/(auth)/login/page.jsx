@@ -13,11 +13,11 @@ const Page = () => {
   const onFinish = async (values) => {
     try {
       const response = await axios.post('/api/auth/login', values);
-      console.log(response ,"response")
-      if (response.data.status == 200) {
-        Cookies.set('token', response.data.token);
+      console.log(response, "response");
+      if (response.data.status === 200) {
+        Cookies.set('token', response.data.token); // Set token in cookies
         message.success('Login successful!');
-        router.push('/');
+        router.push('/'); // Redirect to home page
       } else {
         message.error('Login failed');
       }
