@@ -15,8 +15,6 @@ import { UploadOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { createData, updateData } from "@/utils/api";
 import TextEditor from "./TextEditor";
 import UploadImage from "./UploadImage";
-import CategorySelect from '@/components/CategorySelect';
-
 
 export default function CreateBlog({
   initialData = null,
@@ -39,10 +37,8 @@ export default function CreateBlog({
         title: initialData.title,
         // content: initialData.content,
         tags: initialData.tags?.join(", "),
-        categories: initialData.categories?.map((cat) => cat._id) || [],
-
-        // categories: initialData.categories?.join(", "),
-        // subcategories: initialData.subcategories?.join(", "),
+        categories: initialData.categories?.join(", "),
+        subcategories: initialData.subcategories?.join(", "),
         excerpt: initialData.excerpt,
         seoTitle: initialData.seoTitle,
         metaDescription: initialData.metaKeywords,
@@ -73,14 +69,12 @@ export default function CreateBlog({
       title: values.title,
       content: editorContent,
       tags: values.tags ? values.tags.split(",").map((tag) => tag.trim()) : [],
-      categories: values.categories || [], // already an array of category IDs
-
-      // categories: values.categories
-      //   ? values.categories.split(",").map((cat) => cat.trim())
-      //   : [],
-      // subcategories: values.subcategories
-      //   ? values.subcategories.split(",").map((sub) => sub.trim())
-      //   : [],
+      categories: values.categories
+        ? values.categories.split(",").map((cat) => cat.trim())
+        : [],
+      subcategories: values.subcategories
+        ? values.subcategories.split(",").map((sub) => sub.trim())
+        : [],
       excerpt: values.excerpt,
       seoTitle: values.seoTitle,
       metaDescription: values.metaKeywords,
@@ -164,25 +158,16 @@ export default function CreateBlog({
           </Form.Item>
 
           <Form.Item
-  label="Categories"
-  name="categories"
-  rules={[{ required: true, message: "Please select at least one category" }]}
->
-  <CategorySelect />
-</Form.Item>
-
-
-          {/* <Form.Item
             label="Categories"
             name="categories"
             rules={[{ required: true, message: "Enter at least one category" }]}
           >
             <Input placeholder="e.g., Tech, Dev" />
-          </Form.Item> */}
-{/* 
+          </Form.Item>
+
           <Form.Item label="Subcategories" name="subcategories">
             <Input placeholder="Optional subcategories..." />
-          </Form.Item> */}
+          </Form.Item>
         </div>
 
         {/* <Form.Item label="Featured Image" name="image">

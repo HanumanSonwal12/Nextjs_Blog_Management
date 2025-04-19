@@ -30,5 +30,5 @@ export async function middleware(req) {
 
 // Match all routes except login and register
 export const config = {
-  matcher: ["/", "/dashboard/:path*", "/profile/:path*", "/blog/:path*"],
+  matcher: ["/",  "/profile/:path*", "/blog/:path*"],
 };
