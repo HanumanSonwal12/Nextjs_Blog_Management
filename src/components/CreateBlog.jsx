@@ -10,56 +10,107 @@ import {
   message,
   Tooltip,
   Modal,
+  TreeSelect,
+  Select
 } from "antd";
-import { UploadOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { InfoCircleOutlined } from "@ant-design/icons";
 import { createData, updateData } from "@/utils/api";
 import TextEditor from "./TextEditor";
 import UploadImage from "./UploadImage";
+import axios from "axios";
 
 export default function CreateBlog({
   initialData = null,
   isModalVisible = false,
-  onSuccess = () => {},
-  onCancel = () => {},
+  onSuccess = () => { },
+  onCancel = () => { },
   isEditing = false,
 }) {
   const [form] = Form.useForm();
   const [isDraft, setIsDraft] = useState(true);
   const [fileList, setFileList] = useState([]);
   const [editorContent, setEditorContent] = useState("");
+  const [categoriesTree, setCategoriesTree] = useState([]);
+  const [tagsList, setTagsList] = useState([]);
+
+
+
+  // Handle image upload success
   const handleUploadSuccess = (url) => {
     form.setFieldsValue({ image: url });
-  }
+  };
+
+  // Fetch categories from API and convert to TreeSelect format
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await axios.get("/api/categories"); 
+        if (res.data.success) {
+          const convertToTreeData = (data) =>
+            data.map((item) => ({
+              title: item.name,
+              value: item._id,
+              key: item._id,
+              children: item.children ? convertToTreeData(item.children) : [],
+            }));
+          setCategoriesTree(convertToTreeData(res.data.data));
+        }
+      } catch (err) {
+        console.error("Failed to fetch categories", err);
+      }
+    };
+    const fetchTags = async () => {
+      try {
+        const res = await axios.get("/api/tag"); 
+        if (res.data.success && res.data.tags) {
+          const formattedTags = res.data.tags.map((tag) => ({
+            label: tag.name,
+            value: tag.name,
+          }));
+          setTagsList(formattedTags);
+        }
+      } catch (err) {
+        console.error("Failed to fetch tags", err);
+      }
+    };
+
+
+
+    fetchCategories();
+    fetchTags();
+  }, []);
 
   useEffect(() => {
     if (initialData && isEditing) {
       form.setFieldsValue({
         title: initialData.title,
-        // content: initialData.content,
-        tags: initialData.tags?.join(", "),
-        categories: initialData.categories?.join(", "),
-        subcategories: initialData.subcategories?.join(", "),
+        tags: initialData.tags || [],
+        categories: initialData.categories || [],
         excerpt: initialData.excerpt,
         seoTitle: initialData.seoTitle,
-        metaDescription: initialData.metaKeywords,
+        metaKeywords: initialData.metaKeywords,
+        image: initialData.image,
       });
+      
       setEditorContent(initialData.content || "");
+      
       setIsDraft(initialData.status === "draft");
-
+  
       if (initialData.image) {
         setFileList([
           {
             uid: "-1",
-            // name: initialData.image,
-
-            name: initialData.image.split("/").pop() || "image.jpg",    
-                    status: "done",
+            name: initialData.image.split("/").pop() || "image.jpg",
+            status: "done",
             url: initialData.image,
           },
         ]);
+      } else {
+        setFileList([]);
       }
     } else {
       form.resetFields();
+      setEditorContent("");
       setIsDraft(true);
       setFileList([]);
     }
@@ -70,29 +121,22 @@ export default function CreateBlog({
       ...(initialData || {}),
       title: values.title,
       content: editorContent,
-      tags: values.tags ? values.tags.split(",").map((tag) => tag.trim()) : [],
-      categories: values.categories
-        ? values.categories.split(",").map((cat) => cat.trim())
-        : [],
-      subcategories: values.subcategories
-        ? values.subcategories.split(",").map((sub) => sub.trim())
-        : [],
+      tags: values.tags || [],
+      categories: values.categories || [],
       excerpt: values.excerpt,
       seoTitle: values.seoTitle,
-      metaDescription: values.metaKeywords,
-      image: fileList.length > 0 ? fileList[0].name : null,
+      metaKeywords: values.metaKeywords,
+      image: fileList.length > 0 ? fileList[0].url || fileList[0].name : null,
       status: isDraft ? "draft" : "published",
     };
 
     try {
-      if (isEditing  && initialData?.id) {
+      if (isEditing && initialData?.id) {
         await updateData(`/blog/update/${initialData.id}`, formattedData);
         message.success(isDraft ? "Draft updated!" : "Blog updated and published!");
-      } else if (createData) {
+      } else {
         await createData("/blog/create", formattedData);
         message.success(isDraft ? "Draft saved!" : "Blog published!");
-      } else {
-        throw new Error("No API method provided.");
       }
 
       onSuccess(formattedData);
@@ -132,72 +176,65 @@ export default function CreateBlog({
 
         <Form.Item
           label="Post Content"
-          // name="content"
           required
           validateStatus={!editorContent ? "error" : ""}
           help={!editorContent ? "Please enter content" : ""}
-          // rules={[{ required: true, message: "Please enter content" }]}
         >
-          {/* <Input.TextArea
-            rows={10}
-            placeholder="Write your content here..."
-            className="resize-none"
-          /> */}
           <TextEditor
-    previousValue={editorContent}
-    updatedValue={(content) => setEditorContent(content)}
-    height={200}
-  />
+            previousValue={editorContent}
+            updatedValue={(content) => setEditorContent(content)}
+            height={200}
+          />
         </Form.Item>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Form.Item
+            label="Image"
+            name="image"
+            rules={[{ required: true, message: "Please upload a featured image!" }]}
+            valuePropName="image"
+            getValueFromEvent={(e) => e}
+          >
+            <UploadImage
+              fileList={fileList}
+              setFileList={setFileList}
+              onUploadSuccess={handleUploadSuccess}
+            />
+          </Form.Item>
           <Form.Item
             label="Tags"
             name="tags"
             rules={[{ required: true, message: "Enter at least one tag" }]}
           >
-            <Input placeholder="e.g., react, blog" />
+            <Select
+              mode="multiple"
+              style={{ width: "100%" }}
+              placeholder="Add tags"
+              options={tagsList}
+            />
+
           </Form.Item>
 
           <Form.Item
             label="Categories"
             name="categories"
-            rules={[{ required: true, message: "Enter at least one category" }]}
+            rules={[{ required: true, message: "Select at least one category" }]}
           >
-            <Input placeholder="e.g., Tech, Dev" />
+            <TreeSelect
+              treeData={categoriesTree}
+              treeCheckable
+              showCheckedStrategy={TreeSelect.SHOW_PARENT}
+              placeholder="Select categories"
+              allowClear
+              style={{ width: "100%" }}
+            />
           </Form.Item>
 
-          <Form.Item label="Subcategories" name="subcategories">
-            <Input placeholder="Optional subcategories..." />
-          </Form.Item>
+
         </div>
 
-        {/* <Form.Item label="Featured Image" name="image">
-          <Upload
-            beforeUpload={() => false}
-            fileList={fileList}
-            onChange={({ fileList }) => setFileList(fileList)}
-            maxCount={1}
-          >
-            <Button icon={<UploadOutlined />}>
-              {fileList.length > 0 ? "Change Image" : "Upload Image"}
-            </Button>
-          </Upload>
-        </Form.Item> */}
 
-<Form.Item
-  label="Image"
-  name="image"
-  rules={[{ required: true, message: "Please upload a featured image!" }]}
-  valuePropName="image"
-  getValueFromEvent={(e) => e} // pass file object or URL to form value
->
- <UploadImage
-          fileList={fileList}
-          setFileList={setFileList}
-          onUploadSuccess={handleUploadSuccess}
-        />
-</Form.Item>
+
         <Form.Item label="Excerpt" name="excerpt">
           <Input.TextArea
             rows={3}
@@ -245,19 +282,28 @@ export default function CreateBlog({
               checked={isDraft}
               onChange={(e) => setIsDraft(e.target.checked)}
             >
-              {isEditing ? (isDraft ? "Keep as Draft" : "Save as Draft") : "Save as Draft"}
+              {isEditing
+                ? isDraft
+                  ? "Keep as Draft"
+                  : "Save as Draft"
+                : "Save as Draft"}
             </Checkbox>
           </Form.Item>
 
           <div className="flex flex-col sm:flex-row gap-3 mt-4">
-            <Button type="primary" className="w-full sm:w-auto" style={{backgroundColor:'#f04d23'}} onClick={() => form.submit()}>
+            <Button
+              type="primary"
+              className="w-full sm:w-auto"
+              style={{ backgroundColor: "#f04d23" }}
+              onClick={() => form.submit()}
+            >
               {isEditing
                 ? isDraft
                   ? "Update Draft"
                   : "Update & Publish"
                 : isDraft
-                ? "Save Draft"
-                : "Publish"}
+                  ? "Save Draft"
+                  : "Publish"}
             </Button>
             <Button className="w-full sm:w-auto" onClick={onCancel}>
               Cancel
