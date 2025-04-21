@@ -37,10 +37,16 @@ const Menubar = () => {
     //   path: "/blog-create",
     // },
     {
-      key: "4",
+      key: "3",
       icon: <TagOutlined />,
       label: <Link href="/blog-category">Categories</Link>,
       path: "/blog-category",
+    },
+    {
+      key: "4",
+      icon: <TagOutlined />,
+      label: <Link href="/tag-list">Tags</Link>,
+      path: "/tag-list",
     },
     {
       key: "sub2",

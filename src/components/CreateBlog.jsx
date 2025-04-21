@@ -50,8 +50,10 @@ export default function CreateBlog({
         setFileList([
           {
             uid: "-1",
-            name: initialData.image,
-            status: "done",
+            // name: initialData.image,
+
+            name: initialData.image.split("/").pop() || "image.jpg",    
+                    status: "done",
             url: initialData.image,
           },
         ]);
