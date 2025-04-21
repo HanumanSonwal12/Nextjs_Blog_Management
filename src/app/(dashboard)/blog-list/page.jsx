@@ -22,12 +22,12 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import {
-  EditOutlined,
-  DeleteOutlined,
+
   CommentOutlined,
   PlusOutlined,
   FilterOutlined,
   ReloadOutlined,
+  EditOutlined, DeleteOutlined
 } from "@ant-design/icons";
 import { deleteData, fetchData } from "@/utils/api";
 import CreateBlog from "@/components/CreateBlog";
@@ -57,6 +57,11 @@ export default function WPStyleBlogTable() {
   const [authors, setAuthors] = useState([]);
   const router = useRouter();
 
+  const themeColors = {
+    primary: "#242a64",
+    danger: "#f04d23",
+  };
+
   const fetchBlogs = useCallback(async (
     page = pagination.current,
     pageSize = pagination.pageSize
@@ -81,7 +86,7 @@ export default function WPStyleBlogTable() {
         throw new Error("Invalid response format");
       }
 
-      const formattedBlogs = data.blogs.map((blog,index) => ({
+      const formattedBlogs = data.blogs.map((blog, index) => ({
         key: blog._id || index,
         id: blog._id,
         slug: blog.slug,
@@ -90,12 +95,12 @@ export default function WPStyleBlogTable() {
         authorId: blog.author?._id || null,
         categories: blog.categories || [],
         tags: blog.tags || [],
-        comments: blog.comments?.length || 0,
+        // comments: blog.comments?.length || 0,
         featuredImage: blog.image || null,
         image: blog.image || null,
         excerpt: blog.excerpt,
         seoTitle: blog.seoTitle,
-        content: blog.content,        
+        content: blog.content,
         metaKeywords: blog.metaKeywords || "",
         date: blog.createdAt ? new Date(blog.createdAt).toISOString().split("T")[0] : "Unknown date",
         status: blog.status || "published",
@@ -147,7 +152,7 @@ export default function WPStyleBlogTable() {
     try {
       await deleteData(`/blog/delete/${id}`);
       message.success("Blog deleted successfully");
-      fetchBlogs(); 
+      fetchBlogs();
     } catch (error) {
       console.error("Delete error:", error);
       message.error("Failed to delete blog: " + (error.message || "Unknown error"));
@@ -180,7 +185,7 @@ export default function WPStyleBlogTable() {
   const handleBlogSaved = () => {
     setIsCreateModalVisible(false);
     setEditingBlog(null);
-    fetchBlogs(); 
+    fetchBlogs();
   };
 
   const resetFilters = () => {
@@ -210,7 +215,7 @@ export default function WPStyleBlogTable() {
           >
             {record.title}
           </a>
-         
+
         </div>
       ),
     },
@@ -266,23 +271,23 @@ export default function WPStyleBlogTable() {
         </div>
       ),
     },
-    {
-      title: <CommentOutlined />,
-      dataIndex: "comments",
-      key: "comments",
-      align: "center",
-      sorter: (a, b) => a.comments - b.comments,
-      render: (count) => (
-        <Badge 
-          count={count} 
-          showZero 
-          style={{ 
-            backgroundColor: count > 0 ? '#1890ff' : '#d9d9d9',
-            fontSize: '12px'
-          }} 
-        />
-      ),
-    },
+    // {
+    //   title: <CommentOutlined />,
+    //   dataIndex: "comments",
+    //   key: "comments",
+    //   align: "center",
+    //   sorter: (a, b) => a.comments - b.comments,
+    //   render: (count) => (
+    //     <Badge
+    //       count={count}
+    //       showZero
+    //       style={{
+    //         backgroundColor: count > 0 ? '#1890ff' : '#d9d9d9',
+    //         fontSize: '12px'
+    //       }}
+    //     />
+    //   ),
+    // },
     {
       title: "Date",
       dataIndex: "date",
@@ -308,14 +313,17 @@ export default function WPStyleBlogTable() {
       render: (_, record) => (
         <Space>
           <Tooltip title="Edit Blog">
-            <Button 
-              type="text" 
-              icon={<EditOutlined />} 
+            <Button
+              type="text"
               onClick={() => handleEdit(record)}
+              icon={<EditOutlined style={{ fontSize: "15px" }} />}
+              size="medium"
+              style={{ backgroundColor: themeColors.primary, color: "#fff" }}
+              shape="circle"
               className="text-blue-600 hover:text-blue-800"
             />
           </Tooltip>
-         
+
           <Popconfirm
             title="Are you sure you want to delete this blog?"
             description="This action cannot be undone."
@@ -324,9 +332,10 @@ export default function WPStyleBlogTable() {
             cancelText="No"
           >
             <Button
-              type="text"
-              icon={<DeleteOutlined />}
-              className="text-red-600 hover:text-red-800"
+              size="medium"
+              style={{ backgroundColor: themeColors.danger, color: "#fff" }}
+              icon={<DeleteOutlined style={{ fontSize: "15px" }} />}
+              shape="circle"
             />
           </Popconfirm>
         </Space>
@@ -430,7 +439,7 @@ export default function WPStyleBlogTable() {
             </Space>
           )}
         </div>
-        
+
         <Button
           icon={<ReloadOutlined />}
           onClick={resetFilters}
