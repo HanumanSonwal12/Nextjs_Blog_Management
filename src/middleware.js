@@ -7,6 +7,12 @@ export async function middleware(req) {
   const token = req.cookies.get("token")?.value;
   const path = req.nextUrl.pathname;
 
+  console.log("Middleware path:", path);
+
+  if (path.startsWith("/api")) {
+    return NextResponse.next();
+  }
+
   if (PUBLIC_ROUTES.includes(path)) {
     return NextResponse.next();
   }
@@ -25,5 +31,7 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/", "/(dashboard)/:path*", "/profile/:path*", "/blog/:path*"],
+  matcher: [
+    "/((?!api|_next|static|favicon.ico|logo.png).*)", 
+  ],
 };

@@ -20,6 +20,7 @@
     "jose": "^6.0.10",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
+    "lodash.debounce": "^4.0.8",
     "mongoose": "^8.13.2",
     "next": "14.2.5",
     "react": "^18",

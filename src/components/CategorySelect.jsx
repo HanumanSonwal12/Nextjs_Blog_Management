@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { TreeSelect, Spin } from 'antd';
 import axios from 'axios';
 
-const CategorySelect = ({ value, onChange }) => {
+const CategorySelect = ({ value, onChange, multiple = false }) => {
   const [treeData, setTreeData] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -41,12 +41,12 @@ const CategorySelect = ({ value, onChange }) => {
       value={value}
       dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
       treeData={treeData}
-      placeholder="Please select category(s)"
+      placeholder={multiple ? "Select categories" : "Select category"}
       treeDefaultExpandAll
       onChange={onChange}
-      multiple
-      treeCheckable
-      showCheckedStrategy={TreeSelect.SHOW_PARENT}
+      multiple={multiple}
+      treeCheckable={multiple}
+      showCheckedStrategy={multiple ? TreeSelect.SHOW_PARENT : undefined}
     />
   );
 };

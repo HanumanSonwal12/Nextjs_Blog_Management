@@ -39,8 +39,8 @@ const Menubar = () => {
     {
       key: "3",
       icon: <TagOutlined />,
-      label: <Link href="/blog-category">Categories</Link>,
-      path: "/blog-category",
+      label: <Link href="/category">Categories</Link>,
+      path: "/category",
     },
     {
       key: "4",

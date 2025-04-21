@@ -3,6 +3,7 @@
 import React from 'react';
 import { Button, Checkbox, Form, Input } from 'antd';
 import Image from 'next/image';
+import Link from 'next/link';
 // import loginImg from '/public/login-image.png'; // <-- Add your image in public folder
 
 const onFinish = (values) => {
@@ -68,6 +69,12 @@ const Page = () => (
             </Button>
           </Form.Item>
         </Form>
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <span >Already have an account? </span>
+          <Link href="/login" style={{ color: '#f04d23', fontWeight: 'bold' }}>
+            Login
+          </Link>
+        </div>
       </div>
     </div>
   </div>
