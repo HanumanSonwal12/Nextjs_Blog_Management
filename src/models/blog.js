@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Category from './category'
 
 const blogSchema = new mongoose.Schema({
   title: { type: String, required: true },
