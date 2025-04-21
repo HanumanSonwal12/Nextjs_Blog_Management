@@ -9,19 +9,23 @@ export async function middleware(req) {
 
   console.log("Middleware path:", path);
 
-  if (path.startsWith("/api")) {
+  // Allow /api and /images routes without token check
+  if (path.startsWith("/api") || path.startsWith("/images")) {
     return NextResponse.next();
   }
 
+  // Allow public routes like login and sign-up
   if (PUBLIC_ROUTES.includes(path)) {
     return NextResponse.next();
   }
 
+  // If no token is present, redirect to login
   if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
   try {
+    // Validate token
     await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET));
     return NextResponse.next();
   } catch (error) {
@@ -32,6 +36,6 @@ export async function middleware(req) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next|static|favicon.ico|logo.png).*)", 
+    "/((?!api|_next|static|favicon.ico|images|logo.png).*)", // Exclude /api, /images, and other static files
   ],
 };
