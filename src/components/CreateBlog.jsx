@@ -32,8 +32,9 @@ export default function CreateBlog({
   const [editorContent, setEditorContent] = useState("");
   const [categoriesTree, setCategoriesTree] = useState([]);
   const [tagsList, setTagsList] = useState([]);
+const [imageUrl, setImageUrl] = useState("");
 
-
+console.log(fileList ,"fileList")
 
   // Handle image upload success
   const handleUploadSuccess = (url) => {
@@ -126,7 +127,7 @@ export default function CreateBlog({
       excerpt: values.excerpt,
       seoTitle: values.seoTitle,
       metaKeywords: values.metaKeywords,
-      image: fileList.length > 0 ? fileList[0].url || fileList[0].name : null,
+      image: fileList.length > 0 ? fileList[0].response.url || fileList[0].name : null,
       status: isDraft ? "draft" : "published",
     };
 
@@ -195,11 +196,20 @@ export default function CreateBlog({
             valuePropName="image"
             getValueFromEvent={(e) => e}
           >
-            <UploadImage
+            {/* <UploadImage
               fileList={fileList}
               setFileList={setFileList}
               onUploadSuccess={handleUploadSuccess}
-            />
+            /> */}
+ <UploadImage
+  fileList={fileList}
+  setFileList={setFileList}
+  onUploadSuccess={(url) => {
+    setImageUrl(url);
+    form.setFieldsValue({ image: url }); // ✅ This will set the form value correctly
+  }}
+/>
+
           </Form.Item>
           <Form.Item
             label="Tags"

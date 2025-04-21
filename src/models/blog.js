@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import Category from './category'
+import User from './User';
 
 const blogSchema = new mongoose.Schema({
   title: { type: String, required: true },
