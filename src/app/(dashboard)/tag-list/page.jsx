@@ -2,21 +2,25 @@
 
 import { useEffect, useState } from "react";
 import { Table, Button, Modal, Form, Input, message, Space } from "antd";
-
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons"; 
 const TagListView = () => {
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [editingTag, setEditingTag] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-
+  
+  const themeColors = {
+    primary: "#242a64",
+    danger: "#f04d23",
+  };
   // Fetch Tags
   const fetchTags = async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/tag");
       const data = await res.json();
-      if (data.success) setTags(data.Tags || []);
+      if (data.success) setTags(data.tags || []);
     } catch (error) {
       message.error("Failed to fetch tags");
     } finally {
@@ -92,6 +96,11 @@ const TagListView = () => {
       render: (_, record) => (
         <Space>
           <Button
+           size="medium"
+           style={{ backgroundColor: themeColors.primary, color: "#fff" }}
+           
+           icon={<EditOutlined  style={{fontSize:"15px"}} />} 
+           shape="circle"
             onClick={() => {
               setEditingTag(record);
               form.setFieldsValue(record);
@@ -99,10 +108,15 @@ const TagListView = () => {
             }}
             type="link"
           >
-            Edit
+            
           </Button>
-          <Button onClick={() => handleDelete(record._id)} danger type="link">
-            Delete
+          <Button 
+            size="medium"
+            style={{ backgroundColor: themeColors.danger, color: "#fff" }}
+            icon={<DeleteOutlined   style={{fontSize:"15px"}}/>} 
+            shape="circle" 
+          onClick={() => handleDelete(record._id)} danger type="link">
+            
           </Button>
         </Space>
       ),
