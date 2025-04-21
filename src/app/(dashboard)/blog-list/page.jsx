@@ -68,7 +68,6 @@ export default function WPStyleBlogTable() {
   ) => {
     setLoading(true);
     try {
-      // Constructing query params correctly
       const query = new URLSearchParams({
         page,
         limit: pageSize,
@@ -80,22 +79,14 @@ export default function WPStyleBlogTable() {
         startDate: filters.startDate ? dayjs(filters.startDate).format('YYYY-MM-DD') : "",
         endDate: filters.endDate ? dayjs(filters.endDate).format('YYYY-MM-DD') : "",
       }).toString();
-  
-      // Log the URL being hit for debugging
-      const url = `/blog?${query}`;
-      console.log("Fetching blogs from URL:", url);
-  
-      // Fetch the data from the API (ensure you have correct base URL)
-      const data = await fetchData(url);
-  
-      console.log("Received data:", data);
-  
-      // Check if the response is valid
+
+      const data = await fetchData(`/blog?${query}`);
+      
+
       if (!data || !data.blogs) {
         throw new Error("Invalid response format");
       }
-  
-      // Formatting the blogs
+
       const formattedBlogs = data.blogs.map((blog, index) => ({
         key: blog._id || index,
         id: blog._id,
@@ -105,6 +96,7 @@ export default function WPStyleBlogTable() {
         authorId: blog.author?._id || null,
         categories: blog.categories || [],
         tags: blog.tags || [],
+        // comments: blog.comments?.length || 0,
         featuredImage: blog.image || null,
         image: blog.image || null,
         excerpt: blog.excerpt,
@@ -114,17 +106,13 @@ export default function WPStyleBlogTable() {
         date: blog.createdAt ? new Date(blog.createdAt).toISOString().split("T")[0] : "Unknown date",
         status: blog.status || "published",
       }));
-  
-      // Set the formatted blogs in state
+
       setBlogs(formattedBlogs);
-  
-      // Update pagination
       setPagination((prev) => ({
         ...prev,
         total: data.total || formattedBlogs.length,
       }));
-  
-      // Extract unique categories, tags, and authors
+
       const uniqueCategories = [...new Set(
         formattedBlogs.flatMap(blog => blog.categories.map(cat => ({ id: cat._id, name: cat.name })))
       )];
@@ -132,21 +120,17 @@ export default function WPStyleBlogTable() {
       const uniqueAuthors = [...new Map(
         formattedBlogs.map(blog => [blog.authorId, { id: blog.authorId, name: blog.author }])
       ).values()];
-  
-      // Update state with unique values
+
       setCategories(uniqueCategories);
       setTags(uniqueTags);
       setAuthors(uniqueAuthors);
     } catch (err) {
-      // Log the error for debugging purposes
-      console.error("Failed to fetch blogs:", err);
-      message.error(`Error loading blogs: ${err.message}`);
+      console.error("Failed to fetch blogs", err);
+      message.error("Failed to load blogs. Please try again.");
     } finally {
-      // Set loading to false after operation
       setLoading(false);
     }
   }, [searchText, filters, pagination.current, pagination.pageSize]);
-  
 
   useEffect(() => {
     const handler = setTimeout(() => {
