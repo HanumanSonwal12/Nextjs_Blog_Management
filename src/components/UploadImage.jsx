@@ -141,6 +141,9 @@ const UploadImage = ({ fileList, setFileList, onUploadSuccess }) => {
       onChange={handleChange}
       showUploadList={{ showPreviewIcon: false }}
       accept="image/*"
+      previewFile={(file) => {
+        return file.thumbUrl || file.url || Promise.resolve('');
+      }}
     >
       {fileList.length >= 1 ? null : (
         <div>
