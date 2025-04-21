@@ -31,6 +31,8 @@ export default function CreateBlog({
   const [fileList, setFileList] = useState([]);
   const [editorContent, setEditorContent] = useState("");
   const [categoriesTree, setCategoriesTree] = useState([]);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
+
   const [tagsList, setTagsList] = useState([]);
 
 
@@ -54,6 +56,8 @@ export default function CreateBlog({
               children: item.children ? convertToTreeData(item.children) : [],
             }));
           setCategoriesTree(convertToTreeData(res.data.data));
+          setCategoriesLoaded(true);
+
         }
       } catch (err) {
         console.error("Failed to fetch categories", err);
@@ -81,19 +85,18 @@ export default function CreateBlog({
   }, []);
 
   useEffect(() => {
-    if (initialData && isEditing) {
+    if (initialData && isEditing && categoriesLoaded) {
       form.setFieldsValue({
         title: initialData.title,
         tags: initialData.tags || [],
-        categories: initialData.categories || [],
-        excerpt: initialData.excerpt,
+        categories: initialData.categories?.map(cat => (typeof cat === 'object' ? cat._id : cat)) || [],
+                excerpt: initialData.excerpt,
         seoTitle: initialData.seoTitle,
         metaKeywords: initialData.metaKeywords,
         image: initialData.image,
       });
       
-      setEditorContent(initialData.content || "");
-      
+      setEditorContent(initialData.content || "");      
       setIsDraft(initialData.status === "draft");
   
       if (initialData.image) {
@@ -108,13 +111,13 @@ export default function CreateBlog({
       } else {
         setFileList([]);
       }
-    } else {
+    }  else if (!isEditing) {
       form.resetFields();
       setEditorContent("");
       setIsDraft(true);
       setFileList([]);
     }
-  }, [initialData, isEditing, form]);
+  }, [initialData, isEditing, form, categoriesLoaded]);
 
   const handleFinish = async (values) => {
     const formattedData = {
@@ -129,6 +132,7 @@ export default function CreateBlog({
       image: fileList.length > 0 ? fileList[0].url || fileList[0].name : null,
       status: isDraft ? "draft" : "published",
     };
+   
 
     try {
       if (isEditing && initialData?.id) {
