@@ -213,7 +213,7 @@ export default function WPStyleBlogTable() {
           type="primary" 
           icon={<PlusOutlined />} 
           onClick={handleCreateBlog}
-          className="bg-blue-600 hover:bg-blue-700"
+          style={{backgroundColor:'#f04d23'}}
         >
           Create New Blog
         </Button>
