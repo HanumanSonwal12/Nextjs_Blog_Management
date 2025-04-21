@@ -250,7 +250,7 @@ export default function CreateBlog({
           </Form.Item>
 
           <div className="flex flex-col sm:flex-row gap-3 mt-4">
-            <Button type="primary" className="w-full sm:w-auto" onClick={() => form.submit()}>
+            <Button type="primary" className="w-full sm:w-auto" style={{backgroundColor:'#f04d23'}} onClick={() => form.submit()}>
               {isEditing
                 ? isDraft
                   ? "Update Draft"

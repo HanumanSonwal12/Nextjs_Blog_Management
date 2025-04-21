@@ -71,7 +71,7 @@ const Page = () => {
             </Form.Item>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit" block size="large">
+              <Button type="primary" htmlType="submit" block size="large" style={{ backgroundColor: '#f04d23', borderColor: '#f04d23' }}>
                 Submit
               </Button>
             </Form.Item>
