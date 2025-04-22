@@ -1,13 +1,20 @@
-
+'use client';
 import React, { useEffect, useState } from "react";
-import SunEditor from "suneditor-react";
 import "suneditor/dist/css/suneditor.min.css";
+import dynamic from 'next/dynamic';
+
+// ❌ Ye galti thi: Do baar same naam se import
+// import SunEditor from "suneditor-react"; 
+
+// ✅ Correct dynamic import with SSR disabled
+const SunEditor = dynamic(() => import('suneditor-react'), {
+  ssr: false,
+});
 
 const TextEditor = ({ previousValue = "a", updatedValue, height }) => {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    
     setIsClient(true);
   }, []);
 
@@ -64,6 +71,3 @@ const TextEditor = ({ previousValue = "a", updatedValue, height }) => {
 };
 
 export default TextEditor;
-
-
-
