@@ -2,18 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { Table, Button, Modal, Form, Input, message, Space } from "antd";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons"; 
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+
 const TagListView = () => {
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false); 
   const [form] = Form.useForm();
   const [editingTag, setEditingTag] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  
+
   const themeColors = {
     primary: "#242a64",
     danger: "#f04d23",
   };
+
   // Fetch Tags
   const fetchTags = async () => {
     setLoading(true);
@@ -34,6 +37,7 @@ const TagListView = () => {
 
   // Add or Edit Tag
   const handleFinish = async (values) => {
+    setSubmitLoading(true);
     const isEdit = !!editingTag;
     const url = isEdit ? `/api/tag/${editingTag._id}` : `/api/tag/create`;
     const method = isEdit ? "PUT" : "POST";
@@ -58,6 +62,8 @@ const TagListView = () => {
       }
     } catch (error) {
       message.error("Something went wrong");
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -96,28 +102,26 @@ const TagListView = () => {
       render: (_, record) => (
         <Space>
           <Button
-           size="medium"
-           style={{ backgroundColor: themeColors.primary, color: "#fff" }}
-           
-           icon={<EditOutlined  style={{fontSize:"15px"}} />} 
-           shape="circle"
+            size="medium"
+            style={{ backgroundColor: themeColors.primary, color: "#fff" }}
+            icon={<EditOutlined style={{ fontSize: "15px" }} />}
+            shape="circle"
             onClick={() => {
               setEditingTag(record);
               form.setFieldsValue(record);
               setModalVisible(true);
             }}
             type="link"
-          >
-            
-          </Button>
-          <Button 
+          />
+          <Button
             size="medium"
             style={{ backgroundColor: themeColors.danger, color: "#fff" }}
-            icon={<DeleteOutlined   style={{fontSize:"15px"}}/>} 
-            shape="circle" 
-          onClick={() => handleDelete(record._id)} danger type="link">
-            
-          </Button>
+            icon={<DeleteOutlined style={{ fontSize: "15px" }} />}
+            shape="circle"
+            onClick={() => handleDelete(record._id)}
+            danger
+            type="link"
+          />
         </Space>
       ),
     },
@@ -153,8 +157,10 @@ const TagListView = () => {
         onCancel={() => {
           setModalVisible(false);
           setEditingTag(null);
+          form.resetFields();
         }}
         onOk={() => form.submit()}
+        confirmLoading={submitLoading} 
       >
         <Form form={form} layout="vertical" onFinish={handleFinish}>
           <Form.Item
@@ -162,13 +168,13 @@ const TagListView = () => {
             label="Tag Name"
             rules={[{ required: true, message: "Tag name is required" }]}
           >
-            <Input />
+            <Input disabled={submitLoading} />
           </Form.Item>
           <Form.Item name="slug" label="Slug (optional)">
-            <Input />
+            <Input disabled={submitLoading} />
           </Form.Item>
           <Form.Item name="description" label="Description">
-            <Input.TextArea />
+            <Input.TextArea disabled={submitLoading} />
           </Form.Item>
         </Form>
       </Modal>
