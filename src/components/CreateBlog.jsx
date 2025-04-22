@@ -15,7 +15,7 @@ import { createData, updateData } from "@/utils/api";
 import TextEditor from "./TextEditor";
 import UploadImage from "./UploadImage";
 import axios from "axios";
-import CategorySelect from "./CategorySelect"; 
+import CategorySelect from "./CategorySelect";
 
 export default function CreateBlog({
   initialData = null,
@@ -31,9 +31,9 @@ export default function CreateBlog({
   const [categoriesTree, setCategoriesTree] = useState([]);
   const [tagsList, setTagsList] = useState([]);
   const [imageUrl, setImageUrl] = useState(initialData?.image || "");
-  const [initialCategories, setInitialCategories] = useState( []);
+  const [initialCategories, setInitialCategories] = useState([]);
 
-  console.log(initialCategories ,"initialData")
+  console.log(initialCategories, "initialData");
 
   const handleUploadSuccess = (url) => {
     form.setFieldsValue({ image: url });
@@ -126,7 +126,9 @@ export default function CreateBlog({
     try {
       if (isEditing && initialData?.id) {
         await updateData(`/blog/update/${initialData.id}`, formattedData);
-        message.success(isDraft ? "Draft updated!" : "Blog updated and published!");
+        message.success(
+          isDraft ? "Draft updated!" : "Blog updated and published!"
+        );
       } else {
         await createData("/blog/create", formattedData);
         message.success(isDraft ? "Draft saved!" : "Blog published!");
@@ -151,7 +153,9 @@ export default function CreateBlog({
         form={form}
         layout="vertical"
         onFinish={handleFinish}
-        onFinishFailed={() => message.error("Please fix the errors before submitting.")}
+        onFinishFailed={() =>
+          message.error("Please fix the errors before submitting.")
+        }
       >
         <Form.Item
           label="Post Title"
@@ -178,7 +182,9 @@ export default function CreateBlog({
           <Form.Item
             label="Image"
             name="image"
-            rules={[{ required: true, message: "Please upload a featured image!" }]}
+            rules={[
+              { required: true, message: "Please upload a featured image!" },
+            ]}
           >
             <UploadImage
               fileList={fileList}
@@ -193,24 +199,18 @@ export default function CreateBlog({
             name="tags"
             rules={[{ required: true, message: "Enter at least one tag" }]}
           >
-            <Select
-              mode="multiple"
-              placeholder="Add tags"
-              options={tagsList}
-            />
+            <Select mode="multiple" placeholder="Add tags" options={tagsList} />
           </Form.Item>
 
           <Form.Item
-  label="Categories"
-  name="categories"
-  rules={[{ required: true, message: "Select at least one category" }]}
->
-  <CategorySelect multiple={true} />
-</Form.Item>
-
-
-
-
+            label="Categories"
+            name="categories"
+            rules={[
+              { required: true, message: "Select at least one category" },
+            ]}
+          >
+            <CategorySelect multiple={true} />
+          </Form.Item>
         </div>
 
         <Form.Item label="Excerpt" name="excerpt">
@@ -248,8 +248,15 @@ export default function CreateBlog({
         </div>
 
         <Form.Item>
-          <Checkbox checked={isDraft} onChange={(e) => setIsDraft(e.target.checked)}>
-            {isEditing ? (isDraft ? "Keep as Draft" : "Save as Draft") : "Save as Draft"}
+          <Checkbox
+            checked={isDraft}
+            onChange={(e) => setIsDraft(e.target.checked)}
+          >
+            {isEditing
+              ? isDraft
+                ? "Keep as Draft"
+                : "Save as Draft"
+              : "Save as Draft"}
           </Checkbox>
         </Form.Item>
 
@@ -259,7 +266,13 @@ export default function CreateBlog({
             style={{ backgroundColor: "#f04d23" }}
             onClick={() => form.submit()}
           >
-            {isEditing ? (isDraft ? "Update Draft" : "Update & Publish") : isDraft ? "Save Draft" : "Publish"}
+            {isEditing
+              ? isDraft
+                ? "Update Draft"
+                : "Update & Publish"
+              : isDraft
+              ? "Save Draft"
+              : "Publish"}
           </Button>
 
           <Button onClick={onCancel}>Cancel</Button>

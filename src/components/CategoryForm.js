@@ -3,14 +3,17 @@
 import { useEffect } from "react";
 import { Form, Input, Modal } from "antd";
 import { createData, updateData } from "@/utils/api";
-import CategorySelect from "./CategorySelect";
+import SingleTreeSelect from "./SingleTreeSelect";
 
 const CategoryForm = ({ visible, onCancel, category, onSuccess }) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
     if (category) {
-      form.setFieldsValue(category);
+      form.setFieldsValue({
+        ...category,
+        parent: category.parent?._id || category.parent || null, // ✅ fix here
+      });
     } else {
       form.resetFields();
     }
@@ -112,9 +115,7 @@ const CategoryForm = ({ visible, onCancel, category, onSuccess }) => {
           label="Parent Category"
           className="text-[#242a64]"
         >
-          <CategorySelect
-            value={form.getFieldValue('parent')}
-            onChange={(val) => form.setFieldsValue({ parent: val })}
+          <SingleTreeSelect
             multiple={false}
             className="border border-gray-300 rounded-md py-3 px-4"
           />
