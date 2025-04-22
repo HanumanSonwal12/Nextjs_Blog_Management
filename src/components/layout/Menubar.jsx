@@ -48,23 +48,23 @@ const Menubar = () => {
       label: <Link href="/tag-list">Tags</Link>,
       path: "/tag-list",
     },
-    {
-      key: "sub2",
-      icon: <SettingOutlined />,
-      label: "Settings",
-      items: [
-        {
-          key: "18",
-          label: <Link href="/admin/settings/profile">Profile</Link>,
-          path: "/admin/settings/profile",
-        },
-        {
-          key: "19",
-          label: <Link href="/admin/settings/account">Account</Link>,
-          path: "/admin/settings/account",
-        },
-      ],
-    },
+    // {
+    //   key: "sub2",
+    //   icon: <SettingOutlined />,
+    //   label: "Settings",
+    //   items: [
+    //     {
+    //       key: "18",
+    //       label: <Link href="/admin/settings/profile">Profile</Link>,
+    //       path: "/admin/settings/profile",
+    //     },
+    //     {
+    //       key: "19",
+    //       label: <Link href="/admin/settings/account">Account</Link>,
+    //       path: "/admin/settings/account",
+    //     },
+    //   ],
+    // },
   ];
 
   useEffect(() => {

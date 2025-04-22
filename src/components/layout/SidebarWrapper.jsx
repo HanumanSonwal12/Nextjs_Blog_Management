@@ -11,7 +11,7 @@ const SidebarWrapper = ({ children }) => {
   };
 
   return (
-    <div className="container  flex h-screen">
+    <div className="flex h-screen">
       <Sidebar collapsed={collapsed} width={256} className="fixed top-0 left-0 h-full" />
 
       <div className="flex flex-col flex-1" style={{ width: '800px' }} >

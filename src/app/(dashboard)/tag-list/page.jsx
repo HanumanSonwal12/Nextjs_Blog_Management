@@ -129,6 +129,7 @@ const TagListView = () => {
         <h2 className="text-xl font-semibold">Tag Manager</h2>
         <Button
           type="primary"
+          style={{ backgroundColor: "#f04d23" }}
           onClick={() => {
             setEditingTag(null);
             form.resetFields();

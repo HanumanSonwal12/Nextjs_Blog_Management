@@ -233,7 +233,7 @@ export default function WPStyleBlogTable() {
       render: (categories) => (
         <div className="flex flex-wrap gap-1">
           {categories.length > 0 ? (
-            categories.slice(0, 2).map((cat) => (
+            categories.map((cat) => (
               <Tag color="blue" key={cat._id || cat.name}>
                 {cat.name}
               </Tag>
