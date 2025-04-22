@@ -9,7 +9,7 @@ export async function middleware(req) {
 
   console.log("Middleware path:", path);
 
-  if (path.startsWith("/api")) {
+  if (path.startsWith("/api") || path.startsWith("/images")) {
     return NextResponse.next();
   }
 
@@ -32,6 +32,6 @@ export async function middleware(req) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next|static|favicon.ico|logo.png).*)", 
+    "/((?!api|_next|static|favicon.ico|images|logo.png).*)",
   ],
 };

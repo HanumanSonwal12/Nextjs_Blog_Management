@@ -31,8 +31,17 @@ export async function PUT(req, { params }) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.userId;
 
-    const { title, content, status, seoTitle, metaKeywords, excerpt, tags } =
-      await req.json();
+    const {
+      title,
+      content,
+      status,
+      seoTitle,
+      metaKeywords,
+      excerpt,
+      tags,
+      image,
+      category,
+    } = await req.json();
 
     if (!title || !content) {
       return NextResponse.json(
@@ -71,6 +80,8 @@ export async function PUT(req, { params }) {
     blog.metaKeywords = metaKeywords || blog.metaKeywords;
     blog.excerpt = excerpt || blog.excerpt;
     blog.tags = tags || blog.tags;
+    blog.image = image || blog.image; 
+    blog.category = category || blog.category; 
 
     await blog.save();
 

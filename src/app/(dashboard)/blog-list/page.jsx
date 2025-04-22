@@ -81,6 +81,7 @@ export default function WPStyleBlogTable() {
       }).toString();
 
       const data = await fetchData(`/blog?${query}`);
+      
 
       if (!data || !data.blogs) {
         throw new Error("Invalid response format");
