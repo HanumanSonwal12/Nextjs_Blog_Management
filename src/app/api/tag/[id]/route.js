@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/db";
+import connectDB from "@/utils/db";
 import Tag from "@/models/tag";
 import slugify from "slugify";
 

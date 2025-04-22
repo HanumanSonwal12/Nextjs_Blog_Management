@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import connectDB from "@/lib/db";
+import connectDB from "@/utils/db";
 import Blog from "@/models/blog";
 import { isValidObjectId } from "mongoose";
 
@@ -14,9 +14,11 @@ const getBlogsWithSEO = async (filter, skip = 0, limit = 10) => {
       select: "name email",
     })
     .populate({
-      path: "categories",
-      select: "name slug description",
-    });
+  path: "categories",
+  select: "name slug description",
+  strictPopulate: false, 
+})
+
 
   return blogs.map((b) => ({
     ...b.toObject(),

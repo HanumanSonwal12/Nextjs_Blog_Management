@@ -89,9 +89,10 @@ export default function CreateBlog({
       form.setFieldsValue({
         ...initialData,
         image: initialData.image,
-        categories: initialData.categories || [], // Initial selected categories
+        // categories: initialData.categories || [], // Initial selected categories
+        categories: initialData.categories?.map((cat) => cat._id) || [],
       });
-      setInitialCategories(initialData.categories?.map((cat) => cat._id) || []);
+      // setInitialCategories(initialData.categories?.map((cat) => cat._id) || []);
       setEditorContent(initialData.content || "");
       setIsDraft(initialData.status === "draft");
 
@@ -200,21 +201,16 @@ export default function CreateBlog({
           </Form.Item>
 
           <Form.Item
-            label="Categories"
-            name="categories"
-            rules={[{ required: true, message: "Select at least one category" }]}
-          >
-            <CategorySelect
-  value={initialCategories}
-  onChange={(value) => {
-    form.setFieldsValue({ categories: value });
-    setInitialCategories(value);
-  }}
-  multiple={true}
-  placeholder="Select categories"
-/>
+  label="Categories"
+  name="categories"
+  rules={[{ required: true, message: "Select at least one category" }]}
+>
+  <CategorySelect multiple={true} />
+</Form.Item>
 
-          </Form.Item>
+
+
+
         </div>
 
         <Form.Item label="Excerpt" name="excerpt">

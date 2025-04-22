@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import Blog from "@/models/blog";
-import connectDB from "@/lib/db";
+import connectDB from "@/utils/db";
 import mongoose from "mongoose";
 
 export async function DELETE(req, { params }) {
