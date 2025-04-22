@@ -302,6 +302,7 @@ const TagListView = () => {
         onClose={() => {
           setModalVisible(false);
           setEditingTag(null);
+          form.resetFields();
         }}
         fetchTags={fetchTags}
         editingTag={editingTag}
