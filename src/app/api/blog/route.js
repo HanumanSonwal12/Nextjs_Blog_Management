@@ -4,6 +4,8 @@ import connectDB from "@/utils/db";
 import Blog from "@/models/blog";
 import { isValidObjectId } from "mongoose";
 
+
+
 const getBlogsWithSEO = async (filter, skip = 0, limit = 10) => {
   const blogs = await Blog.find(filter, { __v: 0 })
     .sort({ createdAt: -1 })
@@ -11,14 +13,18 @@ const getBlogsWithSEO = async (filter, skip = 0, limit = 10) => {
     .limit(limit)
     .populate({
       path: "author",
-      select: "name email",
+      select: "name email", 
     })
     .populate({
-  path: "categories",
-  select: "name slug description",
-  strictPopulate: false, 
-})
-
+      path: "categories",
+      select: "name slug description _id",
+      strictPopulate: false, 
+    })
+    .populate({
+      path: "tags",  
+      select: "name slug",  
+      strictPopulate: false,  
+    });
 
   return blogs.map((b) => ({
     ...b.toObject(),
@@ -27,12 +33,20 @@ const getBlogsWithSEO = async (filter, skip = 0, limit = 10) => {
       metaKeywords: b.metaKeywords,
       excerpt: b.excerpt,
     },
+
+    author: b.author ? { name: b.author.name, email: b.author.email } : null,
+  
+    categories: b.categories ? b.categories.map(cat => ({ name: cat.name, _id: cat._id })) : [],
+  
+    tags: b.tags ? b.tags.map(tag => tag.slug) : [],
   }));
 };
 
+
+
 export async function GET(req) {
   try {
-    await connectDB();
+    await connectDB(); 
 
     const { searchParams } = new URL(req.url);
 
@@ -48,6 +62,7 @@ export async function GET(req) {
     const limit = parseInt(searchParams.get("limit")) || 10;
     const skip = (page - 1) * limit;
 
+    
     let filter = {};
 
     if (search) {
@@ -66,7 +81,7 @@ export async function GET(req) {
     }
 
     if (tag) {
-      filter.tags = { $in: [tag] };
+      filter.tags = { $in: [tag] }; 
     }
 
     if (status) {
@@ -108,6 +123,7 @@ export async function GET(req) {
           },
         });
       } catch (err) {
+      
         filter.status = "published";
         const blogs = await getBlogsWithSEO(filter, skip, limit);
         return NextResponse.json({
