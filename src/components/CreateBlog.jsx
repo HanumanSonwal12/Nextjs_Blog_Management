@@ -32,6 +32,8 @@ export default function CreateBlog({
   const [imageUrl, setImageUrl] = useState(initialData?.image || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  console.log(initialData ," blog initialData")
+
   useEffect(() => {
     if (initialData && isEditing) {
       form.setFieldsValue({

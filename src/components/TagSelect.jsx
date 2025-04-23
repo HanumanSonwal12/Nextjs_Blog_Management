@@ -7,7 +7,7 @@ import TagModal from "./TagForm";
 
 const { Text } = Typography;
 
-const TagSelect = ({ value, onChange, mode = "multiple" }) => {
+const TagSelect = ({ value = [], onChange, mode = "multiple" }) => {
   const [tagsList, setTagsList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [tagModalVisible, setTagModalVisible] = useState(false);
@@ -35,30 +35,44 @@ const TagSelect = ({ value, onChange, mode = "multiple" }) => {
     fetchTags();
   }, []);
 
+  // Get selected tag IDs from tag objects
+  const selectedIds = value.map(tag => tag._id);
+
+  // When user selects/removes tags
+  const handleChange = (selectedIds) => {
+    const selectedTags = tagsList
+      .filter(tag => selectedIds.includes(tag.value))
+      .map(tag => ({
+        _id: tag.value,
+        name: tag.label,
+      }));
+
+    onChange(selectedTags);
+  };
+
   return (
     <div>
       <Select
         mode={mode}
         placeholder="Select tags"
-        value={value}
-        onChange={onChange}
+        value={selectedIds}         // show based on IDs
+        onChange={handleChange}     // return {_id, name}
         options={tagsList}
         loading={loading}
         allowClear
         style={{ width: "100%" }}
       />
 
-      {/* 🔽 Show this BELOW the input field */}
       <div style={{ marginTop: 6 }}>
-      <Button type="link"
+        <Button
+          type="link"
           className="text-blue-500 cursor-pointer hover:underline"
           onClick={() => setTagModalVisible(true)}
         >
           + Add new tag
-          </Button>
+        </Button>
       </div>
 
-      {/* Tag Modal */}
       <TagModal
         visible={tagModalVisible}
         onClose={() => setTagModalVisible(false)}
