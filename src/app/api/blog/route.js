@@ -2,9 +2,8 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import connectDB from "@/utils/db";
 import Blog from "@/models/blog";
+import Tag from "@/models/tag"; // Make sure to import the Tag model for filtering by slug
 import { isValidObjectId } from "mongoose";
-
-
 
 const getBlogsWithSEO = async (filter, skip = 0, limit = 10) => {
   const blogs = await Blog.find(filter, { __v: 0 })
@@ -17,7 +16,7 @@ const getBlogsWithSEO = async (filter, skip = 0, limit = 10) => {
     })
     .populate({
       path: "categories",
-      select: "name slug description _id", // _id bhi include karenge
+      select: "name slug description _id",
       strictPopulate: false, 
     })
     .populate({
@@ -33,25 +32,19 @@ const getBlogsWithSEO = async (filter, skip = 0, limit = 10) => {
       metaKeywords: b.metaKeywords,
       excerpt: b.excerpt,
     },
-    // Author ko sirf name aur email ke sath return karein
     author: b.author ? { name: b.author.name, email: b.author.email } : null,
-    // Categories ko name aur _id ke sath return karein
     categories: b.categories ? b.categories.map(cat => ({ name: cat.name, _id: cat._id })) : [],
-    // Tags ko sirf slug ke saath return karein
-    tags: b.tags ? b.tags.map(tag => ({ _id: tag._id, slug: tag.slug , name:tag.name })) : [],
-
+    tags: b.tags ? b.tags.map(tag => ({ _id: tag._id, slug: tag.slug, name: tag.name })) : [],
   }));
 };
 
-
-
 export async function GET(req) {
   try {
-    await connectDB(); // Establish the DB connection
+    await connectDB(); // DB connection establish karna
 
     const { searchParams } = new URL(req.url);
 
-    // Extract search parameters
+    // Search parameters nikaalna
     const search = searchParams.get("search") || "";
     const category = searchParams.get("category");
     const author = searchParams.get("author");
@@ -64,7 +57,7 @@ export async function GET(req) {
     const limit = parseInt(searchParams.get("limit")) || 10;
     const skip = (page - 1) * limit;
 
-    // Set up the filter
+    // Filter setup karna
     let filter = {};
 
     if (search) {
@@ -82,8 +75,12 @@ export async function GET(req) {
       filter.author = author;
     }
 
+    // Agar tag diya hai, toh tag slug se filter karenge
     if (tag) {
-      filter.tags = { $in: [tag] };  // Filter by tag
+      const tagObj = await Tag.findOne({ slug: tag });
+      if (tagObj) {
+        filter.tags = { $in: [tagObj._id] }; // tag ke slug se ObjectId ko filter karenge
+      }
     }
 
     if (status) {
@@ -96,7 +93,7 @@ export async function GET(req) {
       if (endDate) filter.createdAt.$lte = new Date(endDate);
     }
 
-    // Handle JWT token and authorization
+    // JWT token handle karna
     let token = null;
     const authHeader = req.headers.get("authorization");
     if (authHeader?.startsWith("Bearer ")) {
@@ -106,14 +103,15 @@ export async function GET(req) {
       if (cookieToken) token = cookieToken.value;
     }
 
-    // Get the total number of blogs based on filter
+    // Total blogs count karna
     const total = await Blog.countDocuments(token ? filter : { ...filter, status: "published" });
 
-    // Handle blogs for logged-in users
+    // Agar user logged in hai
     if (token) {
       try {
-        jwt.verify(token, process.env.JWT_SECRET);  // Verify token
+        jwt.verify(token, process.env.JWT_SECRET);  // JWT token verify karna
 
+        // Blogs fetch karna
         const blogs = await getBlogsWithSEO(filter, skip, limit);
         return NextResponse.json({
           status: 200,
@@ -128,7 +126,7 @@ export async function GET(req) {
           },
         });
       } catch (err) {
-        // If token expired, show only published blogs
+        // Agar token expired ho gaya, toh sirf published blogs dikhana
         filter.status = "published";
         const blogs = await getBlogsWithSEO(filter, skip, limit);
         return NextResponse.json({
@@ -146,7 +144,7 @@ export async function GET(req) {
       }
     }
 
-    // For public users, show only published blogs
+    // Agar public user hai, toh sirf published blogs dikhana
     filter.status = "published";
     const blogs = await getBlogsWithSEO(filter, skip, limit);
     return NextResponse.json({
