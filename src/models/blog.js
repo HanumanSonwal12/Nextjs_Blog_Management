@@ -11,7 +11,11 @@ const blogSchema = new mongoose.Schema({
   seoTitle: { type: String },
   metaKeywords: { type: String },
   excerpt: { type: String },
-  tags: { type: [String], default: [] },
+  // tags: { type: [String], default: [] },
+  tags: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Tag'
+  }],
   categories: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category', // ✅ Must match model name exactly
