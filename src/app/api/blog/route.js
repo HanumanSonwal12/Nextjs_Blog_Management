@@ -17,7 +17,7 @@ const getBlogsWithSEO = async (filter, skip = 0, limit = 10) => {
     })
     .populate({
       path: "categories",
-      select: "name slug description _id",
+      select: "name slug description _id", // _id bhi include karenge
       strictPopulate: false, 
     })
     .populate({
@@ -33,12 +33,13 @@ const getBlogsWithSEO = async (filter, skip = 0, limit = 10) => {
       metaKeywords: b.metaKeywords,
       excerpt: b.excerpt,
     },
-
+    // Author ko sirf name aur email ke sath return karein
     author: b.author ? { name: b.author.name, email: b.author.email } : null,
-  
+    // Categories ko name aur _id ke sath return karein
     categories: b.categories ? b.categories.map(cat => ({ name: cat.name, _id: cat._id })) : [],
-  
-    tags: b.tags ? b.tags.map(tag => tag.slug) : [],
+    // Tags ko sirf slug ke saath return karein
+    tags: b.tags ? b.tags.map(tag => ({ _id: tag._id, slug: tag.slug , name:tag.name })) : [],
+
   }));
 };
 
@@ -46,10 +47,11 @@ const getBlogsWithSEO = async (filter, skip = 0, limit = 10) => {
 
 export async function GET(req) {
   try {
-    await connectDB(); 
+    await connectDB(); // Establish the DB connection
 
     const { searchParams } = new URL(req.url);
 
+    // Extract search parameters
     const search = searchParams.get("search") || "";
     const category = searchParams.get("category");
     const author = searchParams.get("author");
@@ -62,7 +64,7 @@ export async function GET(req) {
     const limit = parseInt(searchParams.get("limit")) || 10;
     const skip = (page - 1) * limit;
 
-    
+    // Set up the filter
     let filter = {};
 
     if (search) {
@@ -81,7 +83,7 @@ export async function GET(req) {
     }
 
     if (tag) {
-      filter.tags = { $in: [tag] }; 
+      filter.tags = { $in: [tag] };  // Filter by tag
     }
 
     if (status) {
@@ -94,6 +96,7 @@ export async function GET(req) {
       if (endDate) filter.createdAt.$lte = new Date(endDate);
     }
 
+    // Handle JWT token and authorization
     let token = null;
     const authHeader = req.headers.get("authorization");
     if (authHeader?.startsWith("Bearer ")) {
@@ -103,11 +106,13 @@ export async function GET(req) {
       if (cookieToken) token = cookieToken.value;
     }
 
+    // Get the total number of blogs based on filter
     const total = await Blog.countDocuments(token ? filter : { ...filter, status: "published" });
 
+    // Handle blogs for logged-in users
     if (token) {
       try {
-        jwt.verify(token, process.env.JWT_SECRET);
+        jwt.verify(token, process.env.JWT_SECRET);  // Verify token
 
         const blogs = await getBlogsWithSEO(filter, skip, limit);
         return NextResponse.json({
@@ -123,7 +128,7 @@ export async function GET(req) {
           },
         });
       } catch (err) {
-      
+        // If token expired, show only published blogs
         filter.status = "published";
         const blogs = await getBlogsWithSEO(filter, skip, limit);
         return NextResponse.json({
@@ -141,6 +146,7 @@ export async function GET(req) {
       }
     }
 
+    // For public users, show only published blogs
     filter.status = "published";
     const blogs = await getBlogsWithSEO(filter, skip, limit);
     return NextResponse.json({

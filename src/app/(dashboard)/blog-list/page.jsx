@@ -47,10 +47,11 @@ export default function WPStyleBlogTable() {
     endDate: null,
   });
   const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 10,
-    total: 0,
+    current: 1,    // Current page (starts from 1)
+    pageSize: 10,  // Number of items per page
+    total: 0,      // Total number of records (to be updated from API response)
   });
+  
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
@@ -62,83 +63,86 @@ export default function WPStyleBlogTable() {
     danger: "#f04d23",
   };
 
-  const fetchBlogs = useCallback(async (
-    page = pagination.current,
-    pageSize = pagination.pageSize
-  ) => {
-    setLoading(true);
-    try {
-      const query = new URLSearchParams({
-        page,
-        limit: pageSize,
-        search: searchText || "",
-        author: filters.author || "",
-        tag: filters.tag || "",
-        category: filters.category || "",
-        status: filters.status || "",
-        startDate: filters.startDate ? dayjs(filters.startDate).format('YYYY-MM-DD') : "",
-        endDate: filters.endDate ? dayjs(filters.endDate).format('YYYY-MM-DD') : "",
-      }).toString();
+// useEffect ke bahar likho ye function, dependency me pagination.current ya page mat do
+const fetchBlogs = async (page = 1, pageSize = 10) => {
+  setLoading(true);
+  try {
+    const query = new URLSearchParams({
+      page,
+      limit: pageSize,
+      search: searchText || "",
+      author: filters.author || "",
+      tag: filters.tag || "",
+      category: filters.category || "",
+      status: filters.status || "",
+      startDate: filters.startDate ? dayjs(filters.startDate).format('YYYY-MM-DD') : "",
+      endDate: filters.endDate ? dayjs(filters.endDate).format('YYYY-MM-DD') : "",
+    }).toString();
 
-      const data = await fetchData(`/blog?${query}`);
-      
+    const data = await fetchData(`/blog?${query}`);
+    console.log(data, "data");
 
-      if (!data || !data.blogs) {
-        throw new Error("Invalid response format");
-      }
-
-      const formattedBlogs = data.blogs.map((blog, index) => ({
-        key: blog._id || index,
-        id: blog._id,
-        slug: blog.slug,
-        title: blog.title,
-        author: blog.author?.name || "Unknown",
-        authorId: blog.author?._id || null,
-        categories: blog.categories || [],
-        tags: blog.tags || [],
-        // comments: blog.comments?.length || 0,
-        featuredImage: blog.image || null,
-        image: blog.image || null,
-        excerpt: blog.excerpt,
-        seoTitle: blog.seoTitle,
-        content: blog.content,
-        metaKeywords: blog.metaKeywords || "",
-        date: blog.createdAt ? new Date(blog.createdAt).toISOString().split("T")[0] : "Unknown date",
-        status: blog.status || "published",
-      }));
-
-      setBlogs(formattedBlogs);
-      setPagination((prev) => ({
-        ...prev,
-        total: data.total || formattedBlogs.length,
-      }));
-
-      const uniqueCategories = [...new Set(
-        formattedBlogs.flatMap(blog => blog.categories.map(cat => ({ id: cat._id, name: cat.name })))
-      )];
-      const uniqueTags = [...new Set(formattedBlogs.flatMap(blog => blog.tags))];
-      const uniqueAuthors = [...new Map(
-        formattedBlogs.map(blog => [blog.authorId, { id: blog.authorId, name: blog.author }])
-      ).values()];
-
-      setCategories(uniqueCategories);
-      setTags(uniqueTags);
-      setAuthors(uniqueAuthors);
-    } catch (err) {
-      console.error("Failed to fetch blogs", err);
-      message.error("Failed to load blogs. Please try again.");
-    } finally {
-      setLoading(false);
+    if (!data || !data.blogs || !data.pagination) {
+      throw new Error("Invalid response format");
     }
-  }, [searchText, filters, pagination.current, pagination.pageSize]);
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      fetchBlogs();
-    }, 500);
+    const formattedBlogs = data.blogs.map((blog, index) => ({
+      key: blog._id || index,
+      id: blog._id,
+      slug: blog.slug,
+      title: blog.title,
+      author: blog.author?.name || "Unknown",
+      authorId: blog.author?._id || null,
+      categories: blog.categories || [],
+      tags: blog.tags || [],
+      featuredImage: blog.image || null,
+      image: blog.image || null,
+      excerpt: blog.excerpt,
+      seoTitle: blog.seoTitle,
+      content: blog.content,
+      metaKeywords: blog.metaKeywords || "",
+      date: blog.createdAt ? new Date(blog.createdAt).toISOString().split("T")[0] : "Unknown date",
+      status: blog.status || "published",
+    }));
 
-    return () => clearTimeout(handler);
-  }, [fetchBlogs]);
+    setBlogs(formattedBlogs);
+    setPagination((prev) => ({
+      ...prev,
+      total: data.pagination.total,
+      current: data.pagination.page,
+      pageSize: data.pagination.limit,
+    }));
+
+    const uniqueCategories = [
+      ...new Map(
+        formattedBlogs.flatMap(blog =>
+          blog.categories.map(cat => [cat._id, { id: cat._id, name: cat.name }])
+        )
+      ).values()
+    ];
+    const uniqueTags = [...new Set(formattedBlogs.flatMap(blog => blog.tags))];
+    const uniqueAuthors = [
+      ...new Map(
+        formattedBlogs.map(blog => [blog.authorId, { id: blog.authorId, name: blog.author }])
+      ).values()
+    ];
+
+    setCategories(uniqueCategories);
+    setTags(uniqueTags);
+    setAuthors(uniqueAuthors);
+  } catch (err) {
+    console.error("Failed to fetch blogs", err);
+    message.error("Failed to load blogs. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+useEffect(() => {
+  fetchBlogs(pagination.current, pagination.pageSize);
+}, [searchText, filters]);
+
 
   const handleEdit = (blog) => {
     setEditingBlog(blog);
@@ -257,21 +261,25 @@ export default function WPStyleBlogTable() {
         <div className="flex flex-wrap gap-1">
           {tags.length > 0 ? (
             tags.slice(0, 2).map((tag) => (
-              <Tag color="purple" key={tag}>
-                {tag}
+              <Tag color="purple" key={tag._id}>
+                {tag.name}
               </Tag>
             ))
           ) : (
             <span className="text-gray-400">None</span>
           )}
           {tags.length > 2 && (
-            <Tooltip title={tags.slice(2).join(", ")}>
+            <Tooltip
+              title={tags.slice(2).map((tag) => tag.name).join(", ")}
+            >
               <Tag color="purple">+{tags.length - 2}</Tag>
             </Tooltip>
           )}
         </div>
       ),
     },
+    
+    
     // {
     //   title: <CommentOutlined />,
     //   dataIndex: "comments",
@@ -449,25 +457,31 @@ export default function WPStyleBlogTable() {
           Reset Filters
         </Button>
       </div>
-
       <Table
-        rowSelection={rowSelection}
-        columns={columns}
-        dataSource={blogs}
-        loading={loading}
-        pagination={{
-          current: pagination.current,
-          pageSize: pagination.pageSize,
-          total: pagination.total,
-          showSizeChanger: true,
-          pageSizeOptions: ['10', '20', '50', '100'],
-          showTotal: (total) => `Total ${total} blogs`,
-          onChange: (page, pageSize) =>
-            setPagination((prev) => ({ ...prev, current: page, pageSize })),
-        }}
-        rowClassName="hover:bg-gray-50"
-        locale={{ emptyText: "No blogs found" }}
-      />
+  rowSelection={rowSelection}
+  columns={columns}
+  dataSource={blogs}
+  loading={loading}
+  pagination={{
+    current: pagination.current,        // Current page from pagination state
+    pageSize: pagination.pageSize,      // Number of items per page
+    total: pagination.total,            // Total number of records from API response
+    showSizeChanger: true,              // Allow users to change page size
+    pageSizeOptions: ['10', '20', '50', '100'],  // Options for page size
+    showTotal: (total) => `Total ${total} blogs`,  // Display total blogs
+    onChange: (page, pageSize) => {
+      setPagination((prev) => ({
+        ...prev,
+        current: page,  // Update current page
+        pageSize,       // Update page size
+      }));
+      fetchBlogs(page, pageSize);  // Fetch new page of blogs
+    },
+  }}
+  rowClassName="hover:bg-gray-50"
+  locale={{ emptyText: "No blogs found" }}
+/>
+
 
       {isCreateModalVisible && (
         <CreateBlog
