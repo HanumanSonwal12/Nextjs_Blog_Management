@@ -31,6 +31,7 @@ import {
 } from "@ant-design/icons";
 import { deleteData, fetchData } from "@/utils/api";
 import CreateBlog from "@/components/CreateBlog";
+import AdvancedFilters from "@/components/AdvanceFilter";
 
 export default function WPStyleBlogTable() {
   const [blogs, setBlogs] = useState([]);
@@ -425,6 +426,8 @@ useEffect(() => {
           />
         </Col>
       </Row>
+
+      {/* <AdvancedFilters/> */}
 
       <div className="mb-4 flex justify-between items-center">
         <div>

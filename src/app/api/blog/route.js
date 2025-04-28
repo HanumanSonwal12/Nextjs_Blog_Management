@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import connectDB from "@/utils/db";
 import Blog from "@/models/blog";
-import Tag from "@/models/tag"; // Make sure to import the Tag model for filtering by slug
+import Tag from "@/models/tag"; 
 import { isValidObjectId } from "mongoose";
 
 const getBlogsWithSEO = async (filter, skip = 0, limit = 10) => {
@@ -40,11 +40,10 @@ const getBlogsWithSEO = async (filter, skip = 0, limit = 10) => {
 
 export async function GET(req) {
   try {
-    await connectDB(); // DB connection establish karna
+    await connectDB(); 
 
     const { searchParams } = new URL(req.url);
 
-    // Search parameters nikaalna
     const search = searchParams.get("search") || "";
     const category = searchParams.get("category");
     const author = searchParams.get("author");
