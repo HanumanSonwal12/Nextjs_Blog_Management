@@ -27,11 +27,12 @@ import {
   PlusOutlined,
   FilterOutlined,
   ReloadOutlined,
-  EditOutlined, DeleteOutlined
+  EditOutlined, DeleteOutlined,EyeOutlined  
+  
 } from "@ant-design/icons";
 import { deleteData, fetchData } from "@/utils/api";
 import CreateBlog from "@/components/CreateBlog";
-import AdvancedFilters from "@/components/AdvanceFilter";
+import BlogView from "@/components/BlogView";
 
 export default function WPStyleBlogTable() {
   const [blogs, setBlogs] = useState([]);
@@ -39,6 +40,8 @@ export default function WPStyleBlogTable() {
   const [editingBlog, setEditingBlog] = useState(null);
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [viewingBlog, setViewingBlog] = useState(null);
+const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [filters, setFilters] = useState({
     author: null,
     tag: null,
@@ -48,9 +51,9 @@ export default function WPStyleBlogTable() {
     endDate: null,
   });
   const [pagination, setPagination] = useState({
-    current: 1,    // Current page (starts from 1)
-    pageSize: 10,  // Number of items per page
-    total: 0,      // Total number of records (to be updated from API response)
+    current: 1,   
+    pageSize: 10,  
+    total: 0,     
   });
   
   const [loading, setLoading] = useState(false);
@@ -150,9 +153,21 @@ useEffect(() => {
     setIsCreateModalVisible(true);
   };
 
-  const handleView = (slug) => {
-    window.open(`/blog/${slug}`, '_blank');
-  };
+
+  // Add this function with your other handlers
+const handleViewBlog = (blog) => {
+  setViewingBlog(blog);
+  setIsViewModalVisible(true);
+};
+
+// Add this function to close the view modal
+const handleViewModalClose = () => {
+  setIsViewModalVisible(false);
+  setViewingBlog(null);
+};
+  // const handleView = (slug) => {
+  //   window.open(`/blog/${slug}`, '_blank');
+  // };
 
   const handleDelete = async (id) => {
     try {
@@ -216,8 +231,8 @@ useEffect(() => {
       render: (_, record) => (
         <div>
           <a
-            className="text-blue-600 hover:underline font-medium"
-            onClick={() => handleView(record.slug)}
+            className=" font-medium"
+            // onClick={() => handleView(record.slug)}
           >
             {record.title}
           </a>
@@ -322,6 +337,16 @@ useEffect(() => {
       key: "action",
       render: (_, record) => (
         <Space>
+             <Tooltip title="View Blog">
+        <Button
+          type="text"
+          onClick={() => handleViewBlog(record)}
+          icon={<EyeOutlined style={{ fontSize: "15px" }} />}
+          size="medium"
+          style={{ backgroundColor: "#1890ff", color: "#fff" }}
+          shape="circle"
+        />
+      </Tooltip>
           <Tooltip title="Edit Blog">
             <Button
               type="text"
@@ -466,19 +491,19 @@ useEffect(() => {
   dataSource={blogs}
   loading={loading}
   pagination={{
-    current: pagination.current,        // Current page from pagination state
-    pageSize: pagination.pageSize,      // Number of items per page
-    total: pagination.total,            // Total number of records from API response
-    showSizeChanger: true,              // Allow users to change page size
-    pageSizeOptions: ['10', '20', '50', '100'],  // Options for page size
-    showTotal: (total) => `Total ${total} blogs`,  // Display total blogs
+    current: pagination.current,        
+    pageSize: pagination.pageSize,      
+    total: pagination.total,            
+    showSizeChanger: true,             
+    pageSizeOptions: ['10', '20', '50', '100'], 
+    showTotal: (total) => `Total ${total} blogs`,  
     onChange: (page, pageSize) => {
       setPagination((prev) => ({
         ...prev,
-        current: page,  // Update current page
-        pageSize,       // Update page size
+        current: page,  
+        pageSize,       
       }));
-      fetchBlogs(page, pageSize);  // Fetch new page of blogs
+      fetchBlogs(page, pageSize); 
     },
   }}
   rowClassName="hover:bg-gray-50"
@@ -495,6 +520,13 @@ useEffect(() => {
           isEditing={!!editingBlog}
         />
       )}
+      {isViewModalVisible && viewingBlog && (
+  <BlogView
+    blog={viewingBlog}
+    isVisible={isViewModalVisible}
+    onClose={handleViewModalClose}
+  />
+)}
     </div>
   );
 }

@@ -17,6 +17,7 @@
     "bcryptjs": "^3.0.2",
     "chart.js": "^4.4.9",
     "cloudinary": "^2.6.0",
+    "dompurify": "^3.2.5",
     "formidable": "^3.5.2",
     "jose": "^6.0.10",
     "js-cookie": "^3.0.5",

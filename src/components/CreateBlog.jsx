@@ -31,8 +31,10 @@ export default function CreateBlog({
   const [editorContent, setEditorContent] = useState("");
   const [imageUrl, setImageUrl] = useState(initialData?.image || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contentError, setContentError] = useState(false);
+  const [formSubmitAttempted, setFormSubmitAttempted] = useState(false);
 
-  console.log(initialData ," blog initialData")
+  console.log(initialData, " blog initialData");
 
   useEffect(() => {
     if (initialData && isEditing) {
@@ -59,6 +61,8 @@ export default function CreateBlog({
       setEditorContent("");
       setIsDraft(true);
       setFileList([]);
+      setContentError(false);
+      setFormSubmitAttempted(false);
     }
   }, [initialData, isEditing, form]);
 
@@ -75,8 +79,41 @@ export default function CreateBlog({
     ]);
   };
 
+  const handleSubmit = () => {
+    setFormSubmitAttempted(true);
+    
+    // Validate all form fields
+    form.validateFields().then(() => {
+      // Content validation happens separately since it's not managed by Form
+      if (!editorContent || editorContent.trim() === "") {
+        setContentError(true);
+        message.error("Please enter post content");
+        return;
+      } else {
+        setContentError(false);
+        // If all validations pass, proceed with form submission
+        form.submit();
+      }
+    }).catch((errorInfo) => {
+      // Form validation failed, show error message
+      message.error("Please fix all required fields");
+      // We still need to check content separately
+      if (!editorContent || editorContent.trim() === "") {
+        setContentError(true);
+      }
+    });
+  };
+
   const handleFinish = async (values) => {
     if (isSubmitting) return;
+    
+    // Double-check content validation
+    if (!editorContent || editorContent.trim() === "") {
+      setContentError(true);
+      message.error("Please enter post content");
+      return;
+    }
+    
     setIsSubmitting(true);
 
     const payload = {
@@ -104,9 +141,19 @@ export default function CreateBlog({
     }
   };
 
+  const resetForm = () => {
+    form.resetFields();
+    setEditorContent("");
+    setIsDraft(true);
+    setFileList([]);
+    setContentError(false);
+    setFormSubmitAttempted(false);
+    message.info("Form reset");
+  };
+
   return (
     <Modal
-      title={isEditing ? "Editss Blog" : "Create New Blog"}
+      title={isEditing ? "Edit Blog" : "Create New Blog"}
       open={isModalVisible}
       onCancel={onCancel}
       footer={null}
@@ -117,6 +164,7 @@ export default function CreateBlog({
         form={form}
         layout="vertical"
         onFinish={handleFinish}
+        validateTrigger={formSubmitAttempted ? ["onChange", "onBlur"] : []}
         onFinishFailed={() =>
           message.error("Please fix the errors before submitting.")
         }
@@ -137,12 +185,17 @@ export default function CreateBlog({
             <Form.Item
               label="Post Content"
               required
-              validateStatus={!editorContent ? "error" : ""}
-              help={!editorContent ? "Please enter content" : ""}
+              validateStatus={formSubmitAttempted && contentError ? "error" : ""}
+              help={formSubmitAttempted && contentError ? "Please enter content" : ""}
             >
               <TextEditor
                 previousValue={editorContent}
-                updatedValue={setEditorContent}
+                updatedValue={(value) => {
+                  setEditorContent(value);
+                  if (value && value.trim() !== "") {
+                    setContentError(false);
+                  }
+                }}
                 height={350}
               />
             </Form.Item>
@@ -183,7 +236,7 @@ export default function CreateBlog({
                 <Button
                   type="primary"
                   style={{ backgroundColor: "#f04d23" }}
-                  onClick={() => form.submit()}
+                  onClick={handleSubmit}
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -199,16 +252,7 @@ export default function CreateBlog({
 
                 <div className="flex gap-2">
                   <Button onClick={onCancel}>Cancel</Button>
-                  <Button
-                    danger
-                    onClick={() => {
-                      form.resetFields();
-                      setEditorContent("");
-                      setIsDraft(true);
-                      setFileList([]);
-                      message.info("Form reset");
-                    }}
-                  >
+                  <Button danger onClick={resetForm}>
                     Reset
                   </Button>
                 </div>
